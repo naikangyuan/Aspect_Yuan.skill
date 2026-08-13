@@ -1,0 +1,13 @@
+input: output
+figure:
+  type: field
+field:
+  variable: crust_SP
+colormap:
+  preset: composition
+journal:
+  preset: GRL
+output:
+  prefix: subduction_composition
+  formats: [png, pdf, svg, tiff]
+

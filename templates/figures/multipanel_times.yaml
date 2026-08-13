@@ -1,0 +1,28 @@
+input: output
+figure:
+  type: multipanel
+field:
+  variable: temperature
+panels:
+  - label: a
+    time_ma: 5
+    variable: temperature
+  - label: b
+    time_ma: 10
+    variable: temperature
+  - label: c
+    time_ma: 20
+    variable: temperature
+  - label: d
+    time_ma: 30
+    variable: temperature
+colormap:
+  preset: geodynamics_temperature
+layout:
+  width_mm: 180
+journal:
+  preset: GRL
+output:
+  prefix: figure_temperature_times
+  formats: [png, pdf, svg, tiff]
+  metadata_only: true

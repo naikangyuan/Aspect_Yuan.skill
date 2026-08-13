@@ -1,0 +1,203 @@
+# Teaching template for ordinary geologists: beginner 2-D subduction.
+# This is not a final research model.
+#
+# Local structure source:
+# - tests/kinematically_driven_subduction_2d_case1.prm
+# - cookbooks/kinematically_driven_subduction_2d/kinematically_driven_subduction_2d_case1.prm
+#
+# Geological meaning:
+# A simplified kinematically driven oceanic subduction model in a 3000 x 670 km
+# 2-D box. The subducting plate enters through the upper right boundary, with
+# balancing outflow below it. Density and viscosity differ by composition.
+#
+# Teaching simplification:
+# The research cookbook uses 7 compositional fields for multiple plate layers
+# and a weak zone. This beginner template uses 3 fields:
+#   OP       = overriding plate
+#   ML_SP    = mantle/lithosphere part of the subducting plate
+#   crust_SP = crustal part of the subducting plate
+# This changes material-layer detail but keeps the core geometry, right-side
+# kinematic subduction forcing, density/viscosity contrast, and box size.
+#
+# Smoke status:
+# Passed with local ASPECT 3.1.0-pre on 2026-08-12 using 1 MPI process.
+# Needs verification with ASPECT 3.0.0 or any paper-specific ASPECT version
+# before production use.
+
+set Dimension                              = 2
+set Start time                             = 0
+set End time                               = 1.e5
+set CFL number                             = 0.5
+set Use years in output instead of seconds = true
+set Nonlinear solver scheme                = single Advection, single Stokes
+set Output directory                       = output-beginner-subduction
+set Adiabatic surface temperature          = 0
+
+# Composition is fixed on the inflow boundary so incoming material keeps the
+# intended plate identity.
+subsection Boundary composition model
+  set Fixed composition boundary indicators = right
+  set List of model names = initial composition
+end
+
+# Temperature is dynamically passive in this beginner model, but top, bottom,
+# and right boundary temperatures are fixed because the right side has inflow.
+subsection Boundary temperature model
+  set Fixed temperature boundary indicators = bottom, top, right
+  set List of model names = box
+
+  subsection Box
+    set Bottom temperature = 0
+    set Left temperature   = 0
+    set Right temperature  = 0
+    set Top temperature    = 0
+  end
+end
+
+# Kinematic driving: the upper right boundary pushes the subducting plate into
+# the box, while deeper flow balances mass. This is a prescribed-velocity
+# teaching model, not a dynamically self-initiating subduction model.
+subsection Boundary velocity model
+  set Tangential velocity boundary indicators = left, bottom, top
+  set Prescribed velocity boundary indicators = right x:function
+
+  subsection Function
+    set Function constants  = cm=100.0
+    set Function expression = if(z<540000.0, (600.0/550.0)/cm, \
+                                 if(z>560000.0, -5.0/cm, \
+                                    ((((-600.0/550.0)-5.0)/-20.0)*((z/1000.0)-560.0)+5.0)*(-1.0/cm))); \
+                              0
+    set Variable names      = x,z
+  end
+end
+
+# Simple multicomponent material. The first value is background mantle, then
+# OP, ML_SP, and crust_SP. Viscosity contrasts make the plates stronger than
+# the surrounding mantle.
+subsection Material model
+  set Model name = multicomponent
+
+  subsection Multicomponent
+    set Reference temperature         = 0.0
+    set Viscosity averaging scheme    = maximum composition
+    set Viscosities                   = 1.e20, 1.e23, 1.e23, 1.e20
+    set Densities                     = 3200.0, 3250.0, 3250.0, 3250.0
+    set Thermal conductivities        = 1
+  end
+end
+
+subsection Compositional fields
+  set Number of fields = 3
+  set Names of fields  = OP, ML_SP, crust_SP
+end
+
+# Initial plate geometry adapted from the local ASPECT low-resolution test.
+# TODO: for a real target subduction zone, revise slab dip, plate thickness,
+# trench position, and material-field meanings explicitly.
+subsection Initial composition model
+  set List of model names = function
+
+  subsection Function
+    set Function constants  = Ax=1475600.0, Az=670000.0, \
+                              Bx=1500000.0, Bz=670000.0, \
+                              Cx=1358500.0, Cz=588000.0, \
+                              Dx=1382900.0, Dz=588000.0, \
+                              Ex=1530000.0, Ez=560000.0, \
+                              Fz=663000.0, Gz=662000.0, \
+                              Hz=631000.0, Iz=630000.0
+    set Function expression = \
+                              if(z>=Cz&z>=((Az-Cz)/(Ax-Cx)*(x-Cx)+Cz),1,0); \
+                              if((x>=Ex&z>=Ez&z<Gz)|(x<Ex&z<=((Bz-Dz)/(Bx-Dx)*(x-Dx)+Dz)&z<Gz&z>=((Ez-Dz)/(Ex-Dx)*(x-Dx)+Dz)),1,0); \
+                              if(z>=Cz&z>((Bz-Dz)/(Bx-Dx)*(x-Dx)+Dz)&z<((Az-Cz)/(Ax-Cx)*(x-Cx)+Cz)|z>=Gz&z<=((Bz-Dz)/(Bx-Dx)*(x-Dx)+Dz),1,0)
+    set Variable names      = x,z
+  end
+end
+
+subsection Discretization
+end
+
+subsection Geometry model
+  set Model name = box
+
+  subsection Box
+    set X extent     = 3000e3
+    set Y extent     = 670e3
+    set X repetitions = 4
+  end
+end
+
+subsection Gravity model
+  set Model name = vertical
+
+  subsection Vertical
+    set Magnitude = 9.81
+  end
+end
+
+# Temperature effects are ignored in this first runnable subduction lesson.
+subsection Initial temperature model
+  set List of model names = function
+
+  subsection Function
+    set Function constants  =
+    set Function expression = 0
+    set Variable names      = x,y,t
+  end
+end
+
+# Keep the weak/subduction interface numerically resolvable without the full
+# research cookbook cost. This preserves the ASPECT low-resolution test's
+# refinement logic and avoids the timestep-0 Stokes failure seen in the older
+# 7-field beginner template.
+subsection Mesh refinement
+  set Initial adaptive refinement              = 1
+  set Initial global refinement                = 4
+  set Minimum refinement level                 = 4
+  set Normalize individual refinement criteria = true
+  set Refinement criteria merge operation      = plus
+  set Coarsening fraction                      = 0.01
+  set Refinement fraction                      = 0.95
+  set Run postprocessors on initial refinement = false
+  set Skip solvers on initial refinement       = true
+  set Skip setup initial conditions on initial refinement = true
+  set Strategy                                 = minimum refinement function, viscosity
+  set Time steps between mesh refinement       = 16
+
+  subsection Minimum refinement function
+    set Coordinate system = depth
+    set Variable names = x,z,t
+    set Function constants = vel=150e3, L=100e3, crust=10e3
+    set Function expression = if(x<crust,8,if(x<L,7,if(x<vel,6,4)))
+  end
+end
+
+subsection Formulation
+  set Formulation = Boussinesq approximation
+end
+
+subsection Postprocess
+  set List of postprocessors = visualization, velocity statistics, heating statistics, maximum depth of field, composition velocity statistics, viscous dissipation statistics
+
+  subsection Visualization
+    set List of output variables      = material properties, strain rate, error indicator
+    set Time between graphical output = 5e5
+
+    subsection Material properties
+      set List of material properties = density, viscosity
+    end
+  end
+
+  subsection Composition velocity statistics
+    set Names of selected compositional fields = ML_SP, crust_SP
+  end
+end
+
+subsection Termination criteria
+  set Termination criteria = end time
+end
+
+subsection Solver parameters
+  subsection Stokes solver parameters
+    set Linear solver tolerance = 1e-6
+  end
+end

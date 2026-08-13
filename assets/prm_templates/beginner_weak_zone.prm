@@ -1,0 +1,136 @@
+# Teaching template for ordinary geologists: beginner 2-D weak zone / shear localization.
+# This is not a final research model.
+# Needs verification with ASPECT 3.0.0 before production use.
+#
+# Local structure sources:
+# - benchmarks/finite_strain/simple_shear.prm
+# - benchmarks/shear_bands/shear_bands.prm
+# - cookbooks/continental_extension/continental_extension.prm
+# Geological meaning: a laterally repeated simple shear box with a weak central zone tracked by composition.
+
+set Dimension                              = 2
+set Start time                             = 0
+set End time                               = 1e6
+set Use years in output instead of seconds = true
+set CFL number                             = 0.5
+set Output directory                       = output-beginner-weak-zone
+set Pressure normalization                 = surface
+set Surface pressure                       = 0
+
+# Box domain for a small lithosphere-scale shear experiment.
+subsection Geometry model
+  set Model name = box
+
+  subsection Box
+    set X extent   = 100e3
+    set Y extent   = 50e3
+    # Periodic x boundaries approximate a laterally repeating shear zone and
+    # match the local ASPECT simple-shear benchmark structure.
+    set X periodic = true
+  end
+end
+
+# Opposite horizontal velocities impose simple shear. The function constrains
+# both velocity components on top and bottom; the second component is zero so
+# material does not flow through the horizontal boundaries.
+# TODO: choose rate and boundary indicators for the target geometry.
+subsection Boundary velocity model
+  set Prescribed velocity boundary indicators = bottom:function, top:function
+
+  subsection Function
+    set Variable names      = x,y
+    set Function constants  = u0=0.005, h=50e3
+    set Function expression = u0*(2*y/h-1.0); 0
+  end
+end
+
+# One composition marks the weak zone.
+subsection Compositional fields
+  set Number of fields = 1
+  set Names of fields = weak_zone
+end
+
+# Initial weak zone: a vertical band in the center of the model.
+# TODO: change the band position, width, and dip to match the geological fault or suture.
+subsection Initial composition model
+  set Model name = function
+
+  subsection Function
+    set Variable names      = x,y
+    set Function expression = if(x>45.e3 && x<55.e3, 1, 0)
+  end
+end
+
+subsection Boundary composition model
+  set List of model names = initial composition
+end
+
+# Simple thermal setup; temperature is not the main control in this beginner weak-zone model.
+subsection Boundary temperature model
+  set Fixed temperature boundary indicators = bottom, top
+  set List of model names = box
+
+  subsection Box
+    set Bottom temperature = 1573
+    set Top temperature    = 273
+  end
+end
+
+subsection Initial temperature model
+  set Model name = function
+
+  subsection Function
+    set Variable names      = x,y
+    set Function constants  = h=50e3, Ttop=273, Tbot=1573
+    set Function expression = Ttop + (Tbot-Ttop)*(h-y)/h
+  end
+end
+
+# Simple material model with one composition affecting density.
+# For research weak-zone rheology, replace with visco plastic or a custom material model.
+subsection Material model
+  set Model name = simple
+
+  subsection Simple model
+    set Reference density             = 3300
+    set Reference specific heat       = 1250
+    set Reference temperature         = 273
+    set Thermal conductivity          = 4.7
+    set Thermal expansion coefficient = 3e-5
+    set Viscosity                     = 1e21
+    set Composition viscosity prefactor = 0.1
+  end
+end
+
+subsection Gravity model
+  set Model name = vertical
+
+  subsection Vertical
+    set Magnitude = 9.81
+  end
+end
+
+# Mesh: refine enough to see the weak zone.
+subsection Mesh refinement
+  set Initial global refinement          = 4
+  set Initial adaptive refinement        = 0
+  set Time steps between mesh refinement = 0
+end
+
+subsection Formulation
+  set Formulation = Boussinesq approximation
+end
+
+subsection Postprocess
+  set List of postprocessors = visualization, composition statistics, velocity statistics
+
+  subsection Visualization
+    set List of output variables      = material properties, strain rate
+    set Output format                 = vtu
+    set Time between graphical output = 1e5
+
+    subsection Material properties
+      set List of material properties = density, viscosity
+    end
+  end
+end

@@ -1,0 +1,105 @@
+# Teaching template for ordinary geologists: beginner 2-D mantle plume.
+# This is not a final research model.
+# Needs verification with ASPECT 3.0.0 before production use.
+#
+# Local structure source: cookbooks/plume_2D_chunk/plume2D.prm
+# Geological meaning: a simple hot basal patch in a 2-D spherical chunk.
+
+set Dimension                              = 2
+set Use years in output instead of seconds = true
+set End time                               = 200e6
+set Output directory                       = output-beginner-plume
+set Maximum time step                      = 5e7
+set Nonlinear solver scheme                = iterated Advection and Stokes
+
+# Material model: high-viscosity mantle with diffusion creep style structure from local plume cookbook.
+# TODO: choose viscosity and temperature dependence for the target plume.
+subsection Material model
+  set Model name = visco plastic
+
+  subsection Visco Plastic
+    set Reference temperature = 273
+    set Minimum viscosity = 1.25e23
+    set Maximum viscosity = 1.25e26
+    set Thermal diffusivities = 5.5e-7
+    set Heat capacities       = 1250.
+    set Densities             = 3250
+    set Thermal expansivities = 3e-5
+    set Viscous flow law      = diffusion
+    set Activation volumes for diffusion creep  = 0
+    set Grain size = 1
+    set Prefactors for diffusion creep          = 4e-24
+    set Activation energies for diffusion creep = 0
+    set Cohesions = 1e15
+  end
+end
+
+# Geometry: regional spherical chunk.
+subsection Geometry model
+  set Model name = chunk
+
+  subsection Chunk
+    set Chunk inner radius = 3480000
+    set Chunk outer radius = 6371000
+    set Chunk minimum longitude = 67.5
+    set Chunk maximum longitude = 90
+  end
+end
+
+# Mechanical boundaries: free slip / tangential motion.
+subsection Boundary velocity model
+  set Tangential velocity boundary indicators = 0,1,2,3
+end
+
+# Thermal boundary: cold top and hot basal patch.
+# TODO: adjust patch width and excess temperature.
+subsection Boundary temperature model
+  set Fixed temperature boundary indicators = top, bottom
+  set List of model names = function
+
+  subsection Function
+    set Coordinate system = spherical
+    set Variable names = r, phi
+    set Function constants = pi=3.1415926536
+    set Function expression = if (r>4e6,273,if(phi>7*pi/16,3273,2773))
+  end
+end
+
+# Initial mantle temperature.
+subsection Initial temperature model
+  set Model name = function
+
+  subsection Function
+    set Function expression = 1023
+  end
+end
+
+# Gravity: radial constant would be more natural for a chunk; local cookbook uses this model name.
+subsection Gravity model
+  set Model name = radial constant
+
+  subsection Vertical
+    set Magnitude = 9.81
+  end
+end
+
+subsection Mesh refinement
+  set Initial global refinement          = 5
+  set Initial adaptive refinement        = 0
+  set Time steps between mesh refinement = 0
+end
+
+subsection Postprocess
+  set List of postprocessors = visualization, velocity statistics, temperature statistics
+
+  subsection Visualization
+    set List of output variables = material properties, vertical heat flux
+    set Output format                 = vtu
+    set Time between graphical output = 10e7
+    set Number of grouped files       = 0
+
+    subsection Material properties
+      set List of material properties = density, viscosity
+    end
+  end
+end

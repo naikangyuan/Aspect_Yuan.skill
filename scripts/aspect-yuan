@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+SKILL_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PYTHONPATH="$SKILL_ROOT${PYTHONPATH:+:$PYTHONPATH}" exec python3 -m aspect_yuan.cli "$@"

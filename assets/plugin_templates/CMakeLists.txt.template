@@ -1,0 +1,29 @@
+# Minimal external ASPECT plugin CMake template.
+# Copy this file to CMakeLists.txt in a plugin directory and edit TARGET/SOURCES.
+#
+# Point CMake to an ASPECT build or installation with either:
+#   cmake -D Aspect_DIR=/path/to/aspect/build ..
+# or:
+#   export ASPECT_DIR=/path/to/aspect/build
+
+cmake_minimum_required(VERSION 3.13.4)
+
+find_package(Aspect 2.4.0 QUIET HINTS ${Aspect_DIR} ../ ../../ $ENV{ASPECT_DIR})
+
+if (NOT Aspect_FOUND)
+  message(FATAL_ERROR "\n"
+    "Could not find a valid ASPECT build/installation directory. "
+    "Pass -D Aspect_DIR=<path to ASPECT build/install> to cmake or set ASPECT_DIR.")
+endif ()
+
+DEAL_II_INITIALIZE_CACHED_VARIABLES()
+
+set(TARGET "geologist_plugin")
+project(${TARGET})
+
+set(SOURCES
+  material_model_minimal.cc
+)
+
+add_library(${TARGET} SHARED ${SOURCES})
+ASPECT_SETUP_PLUGIN(${TARGET})

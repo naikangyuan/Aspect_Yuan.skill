@@ -1,0 +1,15 @@
+input: output
+figure:
+  type: field
+field:
+  variable: temperature
+colormap:
+  preset: geodynamics_temperature
+layout:
+  width_mm: 180
+journal:
+  preset: GRL
+output:
+  prefix: figure_temperature
+  metadata_only: true
+

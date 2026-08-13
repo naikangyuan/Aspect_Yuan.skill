@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.DS_Store
+
+# Local ASPECT outputs and generated beginner cases
+output*/
+run.log
+*.run-*.log
+*.summary.csv
+*.png
+*.pdf
+*.svg
+*.tif
+*.tiff
+*_metadata.json
+*_recipe.json
+output_scan.json
+beginner_report.md
+case.prm
+config.yaml
+beginner_figure.yaml
+

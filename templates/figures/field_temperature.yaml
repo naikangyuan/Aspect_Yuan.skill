@@ -1,0 +1,30 @@
+input: output
+figure:
+  type: field
+field:
+  variable: temperature
+time:
+  value_ma: 10
+domain:
+  xlim_km: [0, 3000]
+  ylim_km: [-660, 0]
+colormap:
+  preset: geodynamics_temperature
+  color_limits:
+    method: percentile
+    lower: 2
+    upper: 98
+overlay:
+  velocity:
+    enabled: true
+  contours:
+    composition:
+      levels: [0.5]
+layout:
+  width_mm: 180
+journal:
+  preset: GRL
+output:
+  prefix: figure_temperature
+  formats: [png, pdf, svg, tiff]
+

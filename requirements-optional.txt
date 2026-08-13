@@ -1,0 +1,7 @@
+# Optional runtime dependencies for plotting and YAML convenience.
+# Core linting, evals, and model generation use the Python standard library.
+PyYAML
+pyvista
+vtk
+Pillow
+
