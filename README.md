@@ -8,6 +8,16 @@ This repository is published as a Codex skill: the repository root contains `SKI
 
 Install by cloning this repository into your Codex skills directory, or install through the Codex skill installer when using a GitHub source. Keep the repository root as the skill root.
 
+After GitHub-based installation, verify script permissions:
+
+```bash
+cd ~/.codex/skills/Aspect_Yuan.skill
+chmod +x scripts/*
+scripts/aspect-yuan --help
+```
+
+If a downloaded installation reports `Permission denied`, run the `chmod` command above. A temporary fallback is `bash scripts/aspect-yuan --help`.
+
 Optional plotting dependencies:
 
 ```bash
