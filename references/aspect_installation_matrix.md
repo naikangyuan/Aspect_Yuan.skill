@@ -6,11 +6,11 @@ Use this reference before installing or building ASPECT for reproduction.
 
 Install paper-specific versions outside the main checkout:
 
-- Source: `$HOME/fem3/aspect-versions/aspect-<tag-or-commit>`
-- Build: `$HOME/fem3/aspect-builds/aspect-<tag-or-commit>-release`
-- Runs: `$HOME/fem3/aspect-runs/<paper-or-project>`
+- Source: `$HOME/aspect-work/aspect-versions/aspect-<tag-or-commit>`
+- Build: `$HOME/aspect-work/aspect-builds/aspect-<tag-or-commit>-release`
+- Runs: `$HOME/aspect-work/aspect-runs/<paper-or-project>`
 
-Never overwrite `$HOME/fem3/aspect` unless the user explicitly asks.
+Never overwrite `$HOME/aspect-work/aspect` unless the user explicitly asks.
 
 ## Build Choices
 

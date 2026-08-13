@@ -69,7 +69,7 @@ Result:
 Command with ASPECT smoke:
 
 ```bash
-scripts/release_validate.sh --aspect-bin /home/yuan/fem3/aspect/build/aspect-release --smoke-dir /tmp/aspect-yuan-release-smoke-20260813
+scripts/release_validate.sh --aspect-bin /path/to/aspect --smoke-dir /tmp/aspect-yuan-release-smoke-20260813
 ```
 
 Result:

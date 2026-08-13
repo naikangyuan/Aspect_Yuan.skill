@@ -67,7 +67,7 @@ Result: passed.
 Executable used:
 
 ```bash
-/home/yuan/fem3/aspect/build/aspect-release --version
+/path/to/aspect --version
 ```
 
 Result: available and runnable. The executable reports `ASPECT 3.1.0-pre (main, e3feda6c7)`, so this is a real ASPECT smoke test but not a strict ASPECT 3.0.0 binary test.
@@ -77,9 +77,9 @@ Smoke runs were executed in `/tmp/geologist-aspect-smoke` so the ASPECT source t
 ### Passed
 
 ```bash
-scripts/run_aspect_case.sh /tmp/geologist-aspect-smoke/01_convection/case.prm --aspect-bin /home/yuan/fem3/aspect/build/aspect-release
-scripts/run_aspect_case.sh /tmp/geologist-aspect-smoke/02_weak_zone_updated/case.prm --aspect-bin /home/yuan/fem3/aspect/build/aspect-release
-scripts/run_aspect_case.sh /tmp/geologist-aspect-smoke/03_plume_updated/case.prm --aspect-bin /home/yuan/fem3/aspect/build/aspect-release
+scripts/run_aspect_case.sh /tmp/geologist-aspect-smoke/01_convection/case.prm --aspect-bin /path/to/aspect
+scripts/run_aspect_case.sh /tmp/geologist-aspect-smoke/02_weak_zone_updated/case.prm --aspect-bin /path/to/aspect
+scripts/run_aspect_case.sh /tmp/geologist-aspect-smoke/03_plume_updated/case.prm --aspect-bin /path/to/aspect
 ```
 
 Results:
@@ -113,8 +113,8 @@ Date: 2026-08-11
 
 This validation used two real local ASPECT paper-code directories provided by the user:
 
-- `/home/yuan/aspect-fast_kaili`
-- `/home/yuan/fem3/paper-Gernon-Co-evolution-of-craton-margins-and-interiors-during-continental-breakup-main`
+- `/path/to/paper-code`
+- `/path/to/paper-code`
 
 ### Version detection
 
@@ -151,9 +151,9 @@ Results:
 Commands:
 
 ```bash
-scripts/check_aspect_log.py "/home/yuan/aspect-fast_kaili/The_impact_of_orgenic_inheritance_on_rifted_margin formation/inputfiles_outputs/Model_S5/log.txt"
-scripts/parse_aspect_statistics.py "/home/yuan/aspect-fast_kaili/The_impact_of_orgenic_inheritance_on_rifted_margin formation/inputfiles_outputs/Model_S5/statistics" --csv /tmp/kaili-model-s5-statistics-summary.csv --json
-scripts/make_case_report.py "/home/yuan/aspect-fast_kaili/The_impact_of_orgenic_inheritance_on_rifted_margin formation/inputfiles_outputs/Model_S5" --output /tmp/kaili-model-s5-case-report.md
+scripts/check_aspect_log.py "/path/to/paper-code/The_impact_of_orgenic_inheritance_on_rifted_margin formation/inputfiles_outputs/Model_S5/log.txt"
+scripts/parse_aspect_statistics.py "/path/to/paper-code/The_impact_of_orgenic_inheritance_on_rifted_margin formation/inputfiles_outputs/Model_S5/statistics" --csv /tmp/kaili-model-s5-statistics-summary.csv --json
+scripts/make_case_report.py "/path/to/paper-code/The_impact_of_orgenic_inheritance_on_rifted_margin formation/inputfiles_outputs/Model_S5" --output /tmp/kaili-model-s5-case-report.md
 ```
 
 Result: passed.
@@ -173,8 +173,8 @@ Key values from `Model_S5/statistics`:
 Commands:
 
 ```bash
-scripts/install_aspect_version.sh --source-url https://github.com/Kaili270/aspect.git --ref 8eb11069463af55995f81ef5527acc7f3bf40f5c --prefix /home/yuan/fem3/aspect-versions/kaili-orogenic-inheritance --deal-ii-dir /path/to/dealii-9.3.0 --fastscape-dir /path/to/fastscape-511ff22-build --dry-run
-scripts/install_aspect_version.sh --source-url https://github.com/EstherHeck/aspect.git --ref a1f0aa5 --prefix /home/yuan/fem3/aspect-versions/gernon-craton-breakup --deal-ii-dir /path/to/dealii-10.0.0-pre --dry-run
+scripts/install_aspect_version.sh --source-url https://github.com/Kaili270/aspect.git --ref 8eb11069463af55995f81ef5527acc7f3bf40f5c --prefix $HOME/aspect-work/aspect-versions/kaili-orogenic-inheritance --deal-ii-dir /path/to/dealii-9.3.0 --fastscape-dir /path/to/fastscape-511ff22-build --dry-run
+scripts/install_aspect_version.sh --source-url https://github.com/EstherHeck/aspect.git --ref a1f0aa5 --prefix $HOME/aspect-work/aspect-versions/gernon-craton-breakup --deal-ii-dir /path/to/dealii-10.0.0-pre --dry-run
 ```
 
 Result: both produced isolated source/build plans without modifying the user's existing ASPECT checkout.
@@ -257,9 +257,9 @@ Remaining beginner template smoke tests:
 
 | Template | Smoke command | Result | Evidence |
 |---|---|---|---|
-| `assets/prm_templates/beginner_lithosphere_shortening.prm` | `timeout 180s scripts/run_aspect_case.sh /tmp/geologist-aspect-v01-smoke/shortening/case.prm --aspect-bin /home/yuan/fem3/aspect/build/aspect-release` | Partial startup smoke passed; externally timed out, no internal fatal pattern. | Reached statistics timestep 7, model time `1.4e5 years`, `6080` cells; report: `/tmp/geologist-aspect-v01-smoke/shortening/case_report.md`. |
-| `assets/prm_templates/beginner_rift.prm` | `timeout 180s scripts/run_aspect_case.sh /tmp/geologist-aspect-v01-smoke/rift/case.prm --aspect-bin /home/yuan/fem3/aspect/build/aspect-release` | Partial startup smoke passed; externally timed out, no internal fatal pattern. | Reached statistics timestep 12, model time `2.4e5 years`, `6080` cells; report: `/tmp/geologist-aspect-v01-smoke/rift/case_report.md`. |
-| `assets/prm_templates/beginner_subduction.prm` | `timeout 180s scripts/run_aspect_case.sh /tmp/aspect-yuan-subduction-cli-case/case.prm --aspect-bin /home/yuan/fem3/aspect/build/aspect-release` | Passed local ASPECT smoke from the `aspect-yuan model create` entry point. | Exit status `0`; reached timestep `1` at `1.0e5 years`; `1792` cells; final Stokes iterations `13`; report: `/tmp/aspect-yuan-subduction-cli-case/case_report.md`. |
+| `assets/prm_templates/beginner_lithosphere_shortening.prm` | `timeout 180s scripts/run_aspect_case.sh /tmp/geologist-aspect-v01-smoke/shortening/case.prm --aspect-bin /path/to/aspect` | Partial startup smoke passed; externally timed out, no internal fatal pattern. | Reached statistics timestep 7, model time `1.4e5 years`, `6080` cells; report: `/tmp/geologist-aspect-v01-smoke/shortening/case_report.md`. |
+| `assets/prm_templates/beginner_rift.prm` | `timeout 180s scripts/run_aspect_case.sh /tmp/geologist-aspect-v01-smoke/rift/case.prm --aspect-bin /path/to/aspect` | Partial startup smoke passed; externally timed out, no internal fatal pattern. | Reached statistics timestep 12, model time `2.4e5 years`, `6080` cells; report: `/tmp/geologist-aspect-v01-smoke/rift/case_report.md`. |
+| `assets/prm_templates/beginner_subduction.prm` | `timeout 180s scripts/run_aspect_case.sh /tmp/aspect-yuan-subduction-cli-case/case.prm --aspect-bin /path/to/aspect` | Passed local ASPECT smoke from the `aspect-yuan model create` entry point. | Exit status `0`; reached timestep `1` at `1.0e5 years`; `1792` cells; final Stokes iterations `13`; report: `/tmp/aspect-yuan-subduction-cli-case/case_report.md`. |
 
 ### Subduction beginner template repair
 
@@ -273,7 +273,7 @@ Validation evidence:
 
 - Generated through `scripts/aspect-yuan model create examples/models/subduction_basic.yaml --output-dir /tmp/aspect-yuan-subduction-cli-case`.
 - `scripts/aspect-yuan model validate /tmp/aspect-yuan-subduction-cli-case/case.prm`: `PASS`.
-- ASPECT run with `/home/yuan/fem3/aspect/build/aspect-release`: exit status `0` in about 4 seconds.
+- ASPECT run with `/path/to/aspect`: exit status `0` in about 4 seconds.
 - `scripts/check_aspect_log.py`: normal end, no issues.
 - `scripts/parse_aspect_statistics.py`: `2` rows, `28` columns; final model time `1.0e5 years`.
 - `scripts/aspect-yuan postprocess scan`: detected `solution.pvd`, `pvtu`, `vtu`, `statistics`, `log.txt`, and variables `temperature`, `pressure`, `velocity`, `viscosity`, `strain_rate`, `density`.

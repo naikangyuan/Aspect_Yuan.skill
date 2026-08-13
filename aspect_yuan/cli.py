@@ -9,6 +9,7 @@ from pathlib import Path
 
 from .beginner import run_beginner
 from .config import load_config
+from .env import discover_aspect, environment_check, format_aspect_candidates, format_environment_check
 from .models import create_model, list_models
 from .output_scan import format_scan, scan_output, write_scan
 from .plotting import plot_from_config
@@ -40,6 +41,14 @@ def main(argv: list[str] | None = None) -> int:
     scan.add_argument("--output", type=Path)
     plot = sub.add_parser("plot", help="Create publication-oriented figures from YAML/JSON config.")
     plot.add_argument("config", type=Path)
+    env = sub.add_parser("env", help="Discover ASPECT and common local runtime tools.")
+    env_sub = env.add_subparsers(dest="env_command", required=True)
+    find_aspect = env_sub.add_parser("find-aspect", help="Find ASPECT executables without user-specific paths.")
+    find_aspect.add_argument("--search-root", action="append", type=Path, default=[], help="Additional directory to search.")
+    find_aspect.add_argument("--json", action="store_true")
+    check = env_sub.add_parser("check", help="Check ASPECT, Python, MPI, Docker, and plotting-related tools.")
+    check.add_argument("--search-root", action="append", type=Path, default=[], help="Additional directory to search.")
+    check.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
     try:
         if args.command == "beginner":
@@ -68,6 +77,15 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "plot":
             print(json.dumps(plot_from_config(args.config), indent=2))
             return 0
+        if args.command == "env":
+            if args.env_command == "find-aspect":
+                candidates = discover_aspect(extra_roots=args.search_root)
+                print(json.dumps([c.to_dict() for c in candidates], indent=2) if args.json else format_aspect_candidates(candidates))
+                return 0 if candidates else 1
+            if args.env_command == "check":
+                result = environment_check(extra_roots=args.search_root)
+                print(json.dumps(result, indent=2) if args.json else format_environment_check(result))
+                return 0
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2

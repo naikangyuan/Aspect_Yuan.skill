@@ -19,7 +19,7 @@ from typing import Iterable
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ASPECT_ROOT = Path(os.environ["ASPECT_ROOT"]).resolve() if os.environ.get("ASPECT_ROOT") else ROOT.parents[1]
+ASPECT_ROOT = Path(os.environ["ASPECT_ROOT"]).resolve() if os.environ.get("ASPECT_ROOT") else None
 ASPECT_MARKERS = ("cookbooks", "benchmarks", "tests", "doc", "source", "include")
 
 
@@ -30,7 +30,8 @@ def rel(path: Path) -> str:
         return str(path)
 
 
-def run(cmd: list[str], cwd: Path = ASPECT_ROOT) -> tuple[int, str]:
+def run(cmd: list[str], cwd: Path | None = None) -> tuple[int, str]:
+    cwd = cwd or ROOT
     proc = subprocess.run(cmd, cwd=cwd, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return proc.returncode, proc.stdout
 
@@ -73,6 +74,8 @@ def check_referenced_paths() -> list[str]:
     for source, ref in markdown_refs(md_files):
         candidates = []
         if ref.startswith(tuple(f"{marker}/" for marker in ASPECT_MARKERS)):
+            if ASPECT_ROOT is None:
+                continue
             if (ASPECT_ROOT / ref).exists():
                 continue
             if not any((ASPECT_ROOT / marker).exists() for marker in ASPECT_MARKERS):
@@ -139,7 +142,10 @@ def main() -> int:
 
     failures = 0
     print(f"Static validation for {ROOT}")
-    print(f"ASPECT root inferred as {ASPECT_ROOT}")
+    if ASPECT_ROOT is None:
+        print("ASPECT root: not set; ASPECT source-tree references are skipped. Set ASPECT_ROOT=/path/to/aspect to check them.")
+    else:
+        print(f"ASPECT root: {ASPECT_ROOT}")
     for name, errors in checks.items():
         if errors:
             failures += len(errors)

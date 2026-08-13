@@ -127,7 +127,7 @@ scripts/aspect-yuan plot templates/figures/multipanel_times.yaml
 Unit tests:
 
 ```bash
-PYTHONPATH=/home/yuan/fem3/aspect/.codex-skill-dev/geologist-aspect-300 python3 -m unittest discover -s /home/yuan/fem3/aspect/.codex-skill-dev/geologist-aspect-300/tests
+PYTHONPATH=$ASPECT_ROOT/.codex-skill-dev/geologist-aspect-300 python3 -m unittest discover -s $ASPECT_ROOT/.codex-skill-dev/geologist-aspect-300/tests
 ```
 
 Result: `Ran 9 tests`, `OK`.
@@ -285,7 +285,7 @@ Smoke command:
 ```bash
 scripts/aspect-yuan model create examples/models/subduction_basic.yaml --output-dir /tmp/aspect-yuan-subduction-cli-case
 scripts/aspect-yuan model validate /tmp/aspect-yuan-subduction-cli-case/case.prm
-timeout 180s scripts/run_aspect_case.sh /tmp/aspect-yuan-subduction-cli-case/case.prm --aspect-bin /home/yuan/fem3/aspect/build/aspect-release
+timeout 180s scripts/run_aspect_case.sh /tmp/aspect-yuan-subduction-cli-case/case.prm --aspect-bin /path/to/aspect
 ```
 
 Smoke result:
@@ -331,7 +331,7 @@ With `--run --aspect-bin /path/to/aspect`, it also runs ASPECT, scans output, cr
 Subduction one-command smoke:
 
 ```bash
-scripts/aspect-yuan beginner subduction --output-dir /tmp/aspect-yuan-beginner-subduction-run --run --aspect-bin /home/yuan/fem3/aspect/build/aspect-release
+scripts/aspect-yuan beginner subduction --output-dir /tmp/aspect-yuan-beginner-subduction-run --run --aspect-bin /path/to/aspect
 ```
 
 Result:
@@ -355,7 +355,7 @@ Added beginner eval:
 
 Final P0.3 validation:
 
-- `scripts/aspect-yuan beginner subduction --output-dir /tmp/aspect-yuan-beginner-subduction-run --run --aspect-bin /home/yuan/fem3/aspect/build/aspect-release`: passed.
+- `scripts/aspect-yuan beginner subduction --output-dir /tmp/aspect-yuan-beginner-subduction-run --run --aspect-bin /path/to/aspect`: passed.
 - `scripts/aspect-yuan beginner mantle_convection --output-dir /tmp/aspect-yuan-beginner-mantle-norun`: generated complete beginner directory.
 - `scripts/aspect-yuan beginner rift --output-dir /tmp/aspect-yuan-beginner-rift-norun`: generated complete beginner directory.
 - `python3 scripts/static_validate_skill.py`: passed.
@@ -390,7 +390,7 @@ Result: passed static validation, `9` eval cases, and `13` unit tests. Beginner 
 Release validation with ASPECT:
 
 ```bash
-scripts/release_validate.sh --aspect-bin /home/yuan/fem3/aspect/build/aspect-release --smoke-dir /tmp/aspect-yuan-release-smoke-20260813
+scripts/release_validate.sh --aspect-bin /path/to/aspect --smoke-dir /tmp/aspect-yuan-release-smoke-20260813
 ```
 
 Result: passed static validation, `9` eval cases, `13` unit tests, and the beginner subduction ASPECT smoke.
@@ -406,10 +406,10 @@ Smoke output:
 
 ## Key Paths
 
-- Skill root: `/home/yuan/fem3/aspect/.codex-skill-dev/geologist-aspect-300`
-- CLI: `/home/yuan/fem3/aspect/.codex-skill-dev/geologist-aspect-300/scripts/aspect-yuan`
-- Package: `/home/yuan/fem3/aspect/.codex-skill-dev/geologist-aspect-300/aspect_yuan`
-- Tests: `/home/yuan/fem3/aspect/.codex-skill-dev/geologist-aspect-300/tests`
-- Architecture report: `/home/yuan/fem3/aspect/.codex-skill-dev/geologist-aspect-300/CURRENT_ARCHITECTURE.md`
-- Plan: `/home/yuan/fem3/aspect/.codex-skill-dev/geologist-aspect-300/DEVELOPMENT_PLAN.md`
-- Implementation report: `/home/yuan/fem3/aspect/.codex-skill-dev/geologist-aspect-300/IMPLEMENTATION_REPORT.md`
+- Skill root: `$ASPECT_ROOT/.codex-skill-dev/geologist-aspect-300`
+- CLI: `$ASPECT_ROOT/.codex-skill-dev/geologist-aspect-300/scripts/aspect-yuan`
+- Package: `$ASPECT_ROOT/.codex-skill-dev/geologist-aspect-300/aspect_yuan`
+- Tests: `$ASPECT_ROOT/.codex-skill-dev/geologist-aspect-300/tests`
+- Architecture report: `$ASPECT_ROOT/.codex-skill-dev/geologist-aspect-300/CURRENT_ARCHITECTURE.md`
+- Plan: `$ASPECT_ROOT/.codex-skill-dev/geologist-aspect-300/DEVELOPMENT_PLAN.md`
+- Implementation report: `$ASPECT_ROOT/.codex-skill-dev/geologist-aspect-300/IMPLEMENTATION_REPORT.md`

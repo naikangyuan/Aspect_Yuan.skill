@@ -1,5 +1,5 @@
 {
-  "aspect_root": "/home/yuan/fem3/aspect",
+  "aspect_root": "$ASPECT_ROOT",
   "version_file": "3.1.0-pre",
   "num_prm_files": 1653,
   "num_cpp_header_files": 756,

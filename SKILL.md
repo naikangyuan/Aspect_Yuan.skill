@@ -45,7 +45,8 @@ Every answer must start with the geological meaning of the proposed model, then 
    - Explanation and run-report templates: copy from `assets/explanation_templates/`
    - Parameter-file linting: when checking a `.prm`, run `scripts/aspect_prm_lint.py path/to/file.prm` before deeper interpretation
    - Unified CLI: use `scripts/aspect-yuan --help` to discover implemented v0.2-dev commands
-   - Beginner one-command workflow: for first-time geologists use `scripts/aspect-yuan beginner subduction`, `scripts/aspect-yuan beginner mantle_convection`, or `scripts/aspect-yuan beginner rift`; add `--run --aspect-bin /path/to/aspect` only when the ASPECT executable is known
+   - Environment discovery: before running ASPECT, use `scripts/aspect-yuan env find-aspect` or `scripts/aspect-yuan env check`; prefer `ASPECT_BIN`, `ASPECT_ROOT`, `PATH`, and `--search-root /path/to/search` over hard-coded user-specific paths
+   - Beginner one-command workflow: for first-time geologists use `scripts/aspect-yuan beginner subduction`, `scripts/aspect-yuan beginner mantle_convection`, or `scripts/aspect-yuan beginner rift`; add `--run --aspect-bin /path/to/aspect` only when the ASPECT executable is known, otherwise run `scripts/aspect-yuan env find-aspect` first
    - Model generator: run `scripts/aspect-yuan model list`, `scripts/aspect-yuan model create examples/models/mantle_convection_basic.yaml --output-dir /tmp/case`, and `scripts/aspect-yuan model validate /tmp/case/case.prm`
    - Output scanner: run `scripts/aspect-yuan postprocess scan output/ --json`
    - Publication plotting: run `scripts/aspect-yuan plot examples/figures/temperature.yaml`; use `output.metadata_only: true` when PyVista/VTK is not installed
@@ -71,6 +72,7 @@ Every answer must start with the geological meaning of the proposed model, then 
 
 - Do not fabricate ASPECT parameter names or plugin APIs.
 - Do not fabricate paper code versions, repository URLs, git commits, release tags, supplement filenames, or dependencies.
+- Do not hard-code a developer's home directory, username, local project name, proxy, or machine-specific ASPECT path in generated instructions. Use portable placeholders such as `$HOME`, `$ASPECT_ROOT`, `$ASPECT_BIN`, `/path/to/aspect`, and `/path/to/project`.
 - Do not install or overwrite ASPECT until the target version, source, install directory, and dependency path are explicit.
 - Do not hide scientific tradeoffs behind numerical convenience.
 - Do not convert a 3-D geological question to 2-D, change compressibility, alter rheology, remove a weak zone, change boundary velocities, or simplify material domains without asking or clearly labeling it as an optional simplification.

@@ -17,6 +17,8 @@ python3 -m pip install -r requirements-optional.txt
 Primary v0.2 development commands:
 
 ```bash
+scripts/aspect-yuan env find-aspect
+scripts/aspect-yuan env check
 scripts/aspect-yuan model list
 scripts/aspect-yuan model create examples/models/mantle_convection_basic.yaml --output-dir /tmp/aspect-yuan-demo
 scripts/aspect-yuan model validate /tmp/aspect-yuan-demo/case.prm
@@ -28,7 +30,7 @@ Beginner one-command entry:
 
 ```bash
 scripts/aspect-yuan beginner subduction --output-dir /tmp/my_subduction
-scripts/aspect-yuan beginner subduction --output-dir /tmp/my_subduction --run --aspect-bin /path/to/aspect
+ASPECT_BIN=/path/to/aspect scripts/aspect-yuan beginner subduction --output-dir /tmp/my_subduction --run
 ```
 
 Release validation:
@@ -38,3 +40,5 @@ scripts/release_validate.sh --aspect-bin /path/to/aspect
 ```
 
 The generated models are starter cases for learning and smoke testing. Scientific interpretation still requires ASPECT validation, log/statistics checks, and comparison with the target geological question or paper.
+
+This skill is intended to be portable. Do not hard-code a developer's username or local ASPECT path in generated cases. Prefer `ASPECT_BIN`, `ASPECT_ROOT`, `PATH`, or `scripts/aspect-yuan env find-aspect --search-root /path/to/search`.

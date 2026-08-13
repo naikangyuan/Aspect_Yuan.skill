@@ -1,5 +1,5 @@
 # ASPECT Local Inventory for geologist-aspect-300
-- ASPECT root: `/home/yuan/fem3/aspect`
+- ASPECT root: `$ASPECT_ROOT`
 - VERSION file: `3.1.0-pre`
 - Skill compatibility target requested by user: `ASPECT 3.0.0`
 - PRM files found: `1653`

@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import json
-import os
 import subprocess
 from pathlib import Path
 from typing import Any
 
 from .config import dump_config
+from .env import resolve_aspect_binary
 from .models import MODEL_SPECS, create_model
 from .output_scan import scan_output, write_scan
 from .plotting import plot_from_config
@@ -83,7 +83,7 @@ def run_beginner(model_type: str, output_dir: Path | None, run: bool, aspect_bin
 
 
 def _run_aspect(case_dir: Path, aspect_bin: str | None) -> dict[str, Any]:
-    binary = aspect_bin or os.environ.get("ASPECT_BIN", "aspect")
+    binary = resolve_aspect_binary(aspect_bin)
     log = case_dir / "run.log"
     with log.open("w", encoding="utf-8") as handle:
         proc = subprocess.run([binary, str(case_dir / "case.prm")], cwd=case_dir, stdout=handle, stderr=subprocess.STDOUT, text=True, check=False)

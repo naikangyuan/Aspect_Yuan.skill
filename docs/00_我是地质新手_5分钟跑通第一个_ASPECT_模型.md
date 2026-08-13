@@ -21,10 +21,22 @@ scripts/aspect-yuan beginner subduction --output-dir /tmp/my_subduction
 └── beginner_report.md
 ```
 
+先让 skill 自动找 ASPECT：
+
+```bash
+scripts/aspect-yuan env find-aspect
+```
+
 如果本机已经有 ASPECT：
 
 ```bash
-scripts/aspect-yuan beginner subduction --output-dir /tmp/my_subduction --run --aspect-bin /home/yuan/fem3/aspect/build/aspect-release
+scripts/aspect-yuan beginner subduction --output-dir /tmp/my_subduction --run --aspect-bin /path/to/aspect
+```
+
+也可以用环境变量：
+
+```bash
+ASPECT_BIN=/path/to/aspect scripts/aspect-yuan beginner subduction --output-dir /tmp/my_subduction --run
 ```
 
 ## 2. 看 log 是否正常
@@ -71,4 +83,3 @@ scripts/aspect-yuan plot /tmp/my_subduction/beginner_figure.yaml
 - 模型时间和输出频率
 
 如果必须简化，要在 `case.prm` 注释或报告里写清楚简化改变了什么地质意义。
-

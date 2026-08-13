@@ -3,6 +3,8 @@
 Create a first model:
 
 ```bash
+scripts/aspect-yuan env find-aspect
+scripts/aspect-yuan env check
 scripts/aspect-yuan model create examples/models/mantle_convection_basic.yaml --output-dir /tmp/aspect-yuan-demo
 ```
 
@@ -30,4 +32,3 @@ Create a figure recipe or field plot:
 ```bash
 scripts/aspect-yuan plot examples/figures/temperature.yaml
 ```
-
