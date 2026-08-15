@@ -1,0 +1,13 @@
+model:
+  type: rift
+  case_name: rift_case
+geometry:
+  width_km: 2000
+  depth_km: 660
+thermal:
+  surface_temperature: 273
+  mantle_temperature: 1573
+extension:
+  extension_rate_cm_per_yr: 2.0
+output:
+  interval_kyr: 100

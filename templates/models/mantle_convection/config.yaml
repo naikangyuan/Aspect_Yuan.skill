@@ -1,0 +1,12 @@
+model:
+  type: mantle_convection
+  case_name: mantle_convection_case
+  end_time_years: 1000000
+geometry:
+  width_km: 2900
+  depth_km: 660
+thermal:
+  surface_temperature: 273
+  mantle_temperature: 1573
+output:
+  interval_kyr: 50

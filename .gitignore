@@ -23,3 +23,5 @@ case.prm
 config.yaml
 beginner_figure.yaml
 
+# Packaged model templates must keep their seed configs.
+!templates/models/*/config.yaml

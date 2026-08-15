@@ -1,0 +1,14 @@
+model:
+  type: subduction
+  case_name: subduction_case
+geometry:
+  width_km: 3000
+  depth_km: 660
+thermal:
+  surface_temperature: 273
+  mantle_temperature: 1573
+subduction:
+  slab_dip_deg: 30
+  convergence_rate_cm_per_yr: 5.0
+output:
+  interval_kyr: 100
