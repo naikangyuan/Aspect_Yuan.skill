@@ -1,6 +1,6 @@
 ---
 name: geologist-aspect-300
-description: Use this skill to help geologists reproduce ASPECT geodynamics papers and build ASPECT models with explicit version control, including paper reproduction, DOI/code repository/version/commit detection, ASPECT installation planning, downloaded article code, .prm parameter file generation, cookbook and benchmark adaptation, plugin development, material model setup, deep-shallow coupling, subduction, mantle convection, lithosphere deformation, weak zone, rift, plume, craton edge, boundary conditions, initial conditions, mesh refinement, postprocessing, and parameter validation.
+description: Use Aspect_Yuan or geologist-aspect-300 to help geologists reproduce ASPECT geodynamics papers and build ASPECT models with explicit version control, including paper reproduction, DOI/code repository/version/commit detection, ASPECT installation planning, downloaded article code, .prm parameter file generation, cookbook and benchmark adaptation, beginner teaching models, plugin development, material model setup, deep-shallow coupling, subduction, mantle convection, lithosphere deformation, weak zone, rift, plume, craton edge, boundary conditions, initial conditions, mesh refinement, postprocessing, and parameter validation.
 ---
 
 # Geologist ASPECT 300

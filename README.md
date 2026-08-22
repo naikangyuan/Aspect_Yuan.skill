@@ -1,22 +1,45 @@
 # Aspect_Yuan Skill
 
-Aspect_Yuan is the working name for the geologist-facing ASPECT skill built in `geologist-aspect-300`.
+Aspect_Yuan is a Codex skill for geologists learning ASPECT, starting from beginner runnable models and paper-reproduction workflows.
 
-## Install From GitHub
-
-This repository is published as a Codex skill: the repository root contains `SKILL.md`.
-
-Install by cloning this repository into your Codex skills directory, or install through the Codex skill installer when using a GitHub source. Keep the repository root as the skill root.
-
-After GitHub-based installation, verify script permissions:
+## Install
 
 ```bash
+git clone https://github.com/naikangyuan/Aspect_Yuan.skill.git ~/.codex/skills/Aspect_Yuan.skill
 cd ~/.codex/skills/Aspect_Yuan.skill
 chmod +x scripts/*
 scripts/aspect-yuan --help
 ```
 
-If a downloaded installation reports `Permission denied`, run the `chmod` command above. A temporary fallback is `bash scripts/aspect-yuan --help`.
+If the Codex GitHub installer is used and `scripts/aspect-yuan` reports `Permission denied`, run `chmod +x scripts/*`.
+
+## Smoke Test
+
+```bash
+scripts/install_smoke.sh
+```
+
+With a real ASPECT executable:
+
+```bash
+scripts/install_smoke.sh --aspect-bin /path/to/aspect
+```
+
+## First Model
+
+```bash
+scripts/aspect-yuan beginner subduction --output-dir /tmp/my_subduction
+ASPECT_BIN=/path/to/aspect scripts/aspect-yuan beginner subduction --output-dir /tmp/my_subduction --run
+```
+
+## Useful Commands
+
+```bash
+scripts/aspect-yuan env find-aspect
+scripts/aspect-yuan model create templates/models/subduction/config.yaml --output-dir /tmp/subduction_case
+scripts/aspect-yuan model validate /tmp/subduction_case/case.prm
+scripts/aspect-yuan postprocess scan /tmp/subduction_case/output
+```
 
 Optional plotting dependencies:
 
@@ -24,31 +47,4 @@ Optional plotting dependencies:
 python3 -m pip install -r requirements-optional.txt
 ```
 
-Primary v0.2 development commands:
-
-```bash
-scripts/aspect-yuan env find-aspect
-scripts/aspect-yuan env check
-scripts/aspect-yuan model list
-scripts/aspect-yuan model create examples/models/mantle_convection_basic.yaml --output-dir /tmp/aspect-yuan-demo
-scripts/aspect-yuan model validate /tmp/aspect-yuan-demo/case.prm
-scripts/aspect-yuan postprocess scan /tmp/aspect-yuan-demo/output
-scripts/aspect-yuan plot examples/figures/temperature.yaml
-```
-
-Beginner one-command entry:
-
-```bash
-scripts/aspect-yuan beginner subduction --output-dir /tmp/my_subduction
-ASPECT_BIN=/path/to/aspect scripts/aspect-yuan beginner subduction --output-dir /tmp/my_subduction --run
-```
-
-Release validation:
-
-```bash
-scripts/release_validate.sh --aspect-bin /path/to/aspect
-```
-
-The generated models are starter cases for learning and smoke testing. Scientific interpretation still requires ASPECT validation, log/statistics checks, and comparison with the target geological question or paper.
-
-This skill is intended to be portable. Do not hard-code a developer's username or local ASPECT path in generated cases. Prefer `ASPECT_BIN`, `ASPECT_ROOT`, `PATH`, or `scripts/aspect-yuan env find-aspect --search-root /path/to/search`.
+Generated models are teaching starters, not final research models. Scientific interpretation still requires ASPECT validation, log/statistics checks, and comparison with the target geological question or paper.
