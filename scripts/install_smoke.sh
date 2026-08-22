@@ -50,7 +50,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 cd "$SKILL_ROOT"
-chmod +x scripts/*
+export PYTHONDONTWRITEBYTECODE=1
+find scripts -maxdepth 1 -type f -exec chmod +x {} +
 rm -rf "$WORK_DIR"
 mkdir -p "$WORK_DIR"
 
