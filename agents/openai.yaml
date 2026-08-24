@@ -1,8 +1,8 @@
 interface:
   display_name: "Aspect Yuan"
-  short_description: "Learn and run ASPECT geodynamics models"
+  short_description: "Reproduce papers and build ASPECT models"
   brand_color: "#2563EB"
-  default_prompt: "Use $geologist-aspect-300 to create a beginner ASPECT subduction model and explain the geological meaning before the implementation."
+  default_prompt: "Use $geologist-aspect-300 to inspect an ASPECT paper code directory, identify the version evidence, and create a safe smoke-test plan before changing the model."
 
 policy:
   allow_implicit_invocation: true

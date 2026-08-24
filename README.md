@@ -46,7 +46,9 @@ scripts/aspect-yuan model create templates/models/subduction/config.yaml --outpu
 scripts/aspect-yuan model validate /tmp/subduction_case/case.prm
 scripts/aspect-yuan postprocess scan /tmp/subduction_case/output
 scripts/aspect-yuan reproduce init /tmp/paper_repro
-scripts/aspect-yuan reproduce inspect /path/to/paper-code --project /tmp/paper_repro
+scripts/aspect-yuan reproduce catalog
+scripts/aspect-yuan reproduce template kaili-rift /tmp/kaili_repro
+scripts/aspect-yuan reproduce inspect /path/to/paper-code --project /tmp/paper_repro --profile auto
 scripts/aspect-yuan reproduce status /tmp/paper_repro
 ```
 

@@ -1,6 +1,6 @@
 ---
 name: geologist-aspect-300
-description: Use Aspect_Yuan or geologist-aspect-300 to help geologists reproduce ASPECT geodynamics papers and build ASPECT models with explicit version control, including paper reproduction, DOI/code repository/version/commit detection, ASPECT installation planning, downloaded article code, .prm parameter file generation, cookbook and benchmark adaptation, beginner teaching models, plugin development, material model setup, deep-shallow coupling, subduction, mantle convection, lithosphere deformation, weak zone, rift, plume, craton edge, boundary conditions, initial conditions, mesh refinement, postprocessing, and parameter validation.
+description: Use Aspect_Yuan or geologist-aspect-300 to help geologists reproduce ASPECT geodynamics papers and build ASPECT models with explicit version control, including Kaili, ONeill, and Gernon paper-code workflows, paper reproduction profiles, DOI/code repository/version/commit detection, ASPECT installation planning, downloaded article code, .prm parameter file generation, cookbook and benchmark adaptation, beginner teaching models, plugin development, material model setup, deep-shallow coupling, subduction, mantle convection, lithosphere deformation, weak zone, rift, plume, craton edge, boundary conditions, initial conditions, mesh refinement, postprocessing, and parameter validation.
 ---
 
 # Geologist ASPECT 300
@@ -63,7 +63,9 @@ Every answer must start with the geological meaning of the proposed model, then 
    - Statistics parsing/plotting: run `scripts/parse_aspect_statistics.py path/to/statistics` or `scripts/plot_statistics.py path/to/statistics`
    - Plugin build helper: run `scripts/build_aspect_plugin.sh path/to/plugin-dir --aspect-dir path/to/aspect-build`
    - Plugin request triage: run `scripts/explain_plugin_request.py "natural language request"`
-   - Paper reproduction MVP: run `scripts/aspect-yuan reproduce init PAPER_PROJECT`, then `scripts/aspect-yuan reproduce inspect /path/to/paper-code --project PAPER_PROJECT`, then `scripts/aspect-yuan reproduce status PAPER_PROJECT`; this creates reproduction.yaml, REPRODUCTION_REPORT.md, and parameter_inventory.csv without changing the paper model
+   - Paper reproduction profiles: run `scripts/aspect-yuan reproduce catalog` to list built-in templates for Kaili-style rifted margin/orogenic inheritance, ONeill-style Hadean lateral mixing, and Gernon-style craton breakup projects
+   - Paper reproduction template: run `scripts/aspect-yuan reproduce template kaili-rift PAPER_PROJECT`, `scripts/aspect-yuan reproduce template oneill-hadean-mixing PAPER_PROJECT`, or `scripts/aspect-yuan reproduce template gernon-craton-breakup PAPER_PROJECT` before scanning matching paper code
+   - Paper reproduction MVP: run `scripts/aspect-yuan reproduce init PAPER_PROJECT`, then `scripts/aspect-yuan reproduce inspect /path/to/paper-code --project PAPER_PROJECT --profile auto`, then `scripts/aspect-yuan reproduce status PAPER_PROJECT`; this creates reproduction.yaml, REPRODUCTION_REPORT.md, parameter_inventory.csv, SMOKE_TEST_PLAN.md, VERSION_PLAN.md, and PAPER_REPRODUCTION_CHECKLIST.md without changing the paper model
    - Paper/version detection: run `scripts/detect_aspect_reproduction_context.py --text path/to/paper_or_readme.txt` or `--path path/to/downloaded/code`
    - Model-family version planning: run `scripts/plan_aspect_version.py "user geological request or paper title"`
    - Isolated ASPECT source checkout/build planning: use `scripts/install_aspect_version.sh --help`; execute only after explaining target version, install directory, dependencies, and approval needs

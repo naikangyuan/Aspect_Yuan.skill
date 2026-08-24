@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from aspect_yuan.reproduce import init_project, inspect_code, reproduction_status, scan_code_path
+from aspect_yuan.reproduce import init_profile_project, init_project, inspect_code, list_paper_profiles, reproduction_status, scan_code_path
 
 
 class ReproductionPlaceholderTests(unittest.TestCase):
@@ -37,10 +37,13 @@ class ReproductionPlaceholderTests(unittest.TestCase):
                 "aspect_yuan.reproduce.fingerprint_aspect",
                 return_value={"aspect_version": "3.0.0", "support_tier": "primary-supported", "detection_evidence": []},
             ):
-                result = inspect_code(code, project)
+                result = inspect_code(code, project, "auto")
             self.assertTrue((project / "reproduction.yaml").exists())
             self.assertTrue((project / "REPRODUCTION_REPORT.md").exists())
             self.assertTrue((project / "parameter_inventory.csv").exists())
+            self.assertTrue((project / "SMOKE_TEST_PLAN.md").exists())
+            self.assertTrue((project / "VERSION_PLAN.md").exists())
+            self.assertTrue((project / "PAPER_REPRODUCTION_CHECKLIST.md").exists())
             self.assertIn("Level 1", result["reproduction_level"])
             report = (project / "REPRODUCTION_REPORT.md").read_text(encoding="utf-8")
             self.assertIn("model.prm", report)
@@ -54,6 +57,65 @@ class ReproductionPlaceholderTests(unittest.TestCase):
             self.assertTrue(status["has_version_evidence"])
             self.assertEqual(status["local_aspect_version"], "3.0.0")
             self.assertTrue(status["version_mismatch"])
+
+    def test_profile_catalog_contains_real_project_archetypes(self):
+        keys = {profile["key"] for profile in list_paper_profiles()}
+        self.assertGreaterEqual(keys, {"kaili-rift", "oneill-hadean-mixing", "gernon-craton-breakup"})
+
+    def test_template_initializes_profile_project(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / "kaili-template"
+            result = init_profile_project("kaili-rift", project)
+            self.assertEqual(result["profile"], "kaili-rift")
+            self.assertTrue((project / "reproduction_profile.yaml").exists())
+            self.assertTrue((project / "SMOKE_TEST_PLAN.md").exists())
+            self.assertTrue((project / "VERSION_PLAN.md").exists())
+            self.assertTrue((project / "PAPER_REPRODUCTION_CHECKLIST.md").exists())
+            config = (project / "reproduction.yaml").read_text(encoding="utf-8")
+            self.assertIn("kaili-rift", config)
+
+    def test_auto_profile_detects_kaili_style_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            code = root / "aspect-fast_kaili"
+            prm = code / "The_impact_of_orgenic_inheritance_on_rifted_margin formation" / "inputfiles_outputs" / "Model_S5" / "continental_extension.prm"
+            prm.parent.mkdir(parents=True)
+            prm.write_text("set Dimension = 2\n", encoding="utf-8")
+            plugin = code / "The_impact_of_orgenic_inheritance_on_rifted_margin formation" / "plugins_Aspect" / "initial_temperature" / "lithosphere_rift.cc"
+            plugin.parent.mkdir(parents=True)
+            plugin.write_text("// plugin\n", encoding="utf-8")
+            (code / "README.md").write_text("ASPECT version 2.4.0-pre with FastScape.\n", encoding="utf-8")
+            project = root / "repro"
+            with mock.patch("aspect_yuan.reproduce.fingerprint_aspect", return_value={"aspect_version": "3.1.0-pre"}):
+                result = inspect_code(code, project, "auto")
+            self.assertEqual(result["profile"], "kaili-rift")
+            report = (project / "REPRODUCTION_REPORT.md").read_text(encoding="utf-8")
+            self.assertIn("kaili-rift", report)
+            self.assertIn("continental_extension.prm", (project / "SMOKE_TEST_PLAN.md").read_text(encoding="utf-8"))
+
+    def test_auto_profile_detects_oneill_style_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            code = root / "ONeill"
+            code.mkdir()
+            (code / "mixing_100km.prm").write_text("set Dimension = 2\n", encoding="utf-8")
+            (code / "README.md").write_text("Hadean lateral mixing model.\n", encoding="utf-8")
+            project = root / "repro"
+            with mock.patch("aspect_yuan.reproduce.fingerprint_aspect", return_value={"aspect_version": None}):
+                result = inspect_code(code, project, "auto")
+            self.assertEqual(result["profile"], "oneill-hadean-mixing")
+
+    def test_auto_profile_detects_gernon_style_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            code = root / "paper-Gernon-Co-evolution-of-craton-margins-and-interiors-during-continental-breakup-main"
+            code.mkdir()
+            (code / "model.prm").write_text("set Dimension = 2\n", encoding="utf-8")
+            (code / "README.md").write_text("craton margins and continental-breakup ASPECT model.\n", encoding="utf-8")
+            project = root / "repro"
+            with mock.patch("aspect_yuan.reproduce.fingerprint_aspect", return_value={"aspect_version": None}):
+                result = inspect_code(code, project, "auto")
+            self.assertEqual(result["profile"], "gernon-craton-breakup")
 
     def test_embedded_aspect_source_prms_are_not_primary_paper_prms(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -105,11 +105,17 @@ subsection Geometry model
 end
 EOF
 scripts/aspect-yuan reproduce init "$PAPER_PROJECT" >/dev/null
-scripts/aspect-yuan reproduce inspect "$PAPER_CODE" --project "$PAPER_PROJECT" >/dev/null
+scripts/aspect-yuan reproduce catalog >/dev/null
+scripts/aspect-yuan reproduce template kaili-rift "$WORK_DIR/kaili-template" >/dev/null
+scripts/aspect-yuan reproduce inspect "$PAPER_CODE" --project "$PAPER_PROJECT" --profile auto >/dev/null
 scripts/aspect-yuan reproduce status "$PAPER_PROJECT" >/dev/null
 test -f "$PAPER_PROJECT/reproduction.yaml"
 test -f "$PAPER_PROJECT/REPRODUCTION_REPORT.md"
 test -f "$PAPER_PROJECT/parameter_inventory.csv"
+test -f "$PAPER_PROJECT/SMOKE_TEST_PLAN.md"
+test -f "$PAPER_PROJECT/VERSION_PLAN.md"
+test -f "$PAPER_PROJECT/PAPER_REPRODUCTION_CHECKLIST.md"
+test -f "$WORK_DIR/kaili-template/reproduction_profile.yaml"
 
 echo "[7/8] Unit tests"
 PYTHONPATH="$SKILL_ROOT${PYTHONPATH:+:$PYTHONPATH}" python3 -m unittest discover -s tests

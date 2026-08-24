@@ -17,7 +17,7 @@ from .models import create_model, list_models
 from .output_scan import format_scan, scan_output, write_scan
 from .plotting import plot_from_config
 from .prm import validate_prm
-from .reproduce import init_project, inspect_code, reproduction_status
+from .reproduce import init_profile_project, init_project, inspect_code, list_paper_profiles, reproduction_status
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -90,11 +90,17 @@ def main(argv: list[str] | None = None) -> int:
     geospec_create.add_argument("--output-dir", type=Path)
     reproduce = sub.add_parser("reproduce", help="Initialize and inspect ASPECT paper-reproduction projects.")
     reproduce_sub = reproduce.add_subparsers(dest="reproduce_command", required=True)
+    reproduce_catalog = reproduce_sub.add_parser("catalog", help="List built-in paper reproduction profiles.")
+    reproduce_catalog.add_argument("--json", action="store_true")
     reproduce_init = reproduce_sub.add_parser("init", help="Create a paper reproduction project.")
     reproduce_init.add_argument("project", type=Path)
+    reproduce_template = reproduce_sub.add_parser("template", help="Create a paper reproduction project from a known paper profile.")
+    reproduce_template.add_argument("profile", choices=["kaili-rift", "oneill-hadean-mixing", "gernon-craton-breakup"])
+    reproduce_template.add_argument("project", type=Path)
     reproduce_inspect = reproduce_sub.add_parser("inspect", help="Inspect a downloaded paper code directory.")
     reproduce_inspect.add_argument("code_path", type=Path)
     reproduce_inspect.add_argument("--project", type=Path, help="Reproduction project directory. Defaults to current directory.")
+    reproduce_inspect.add_argument("--profile", default="auto", help="Paper profile key or auto. Use reproduce catalog to list choices.")
     reproduce_inspect.add_argument("--json", action="store_true")
     reproduce_status_cmd = reproduce_sub.add_parser("status", help="Report reproduction level for a project.")
     reproduce_status_cmd.add_argument("project", type=Path, nargs="?", default=Path("."))
@@ -181,19 +187,34 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"Run: cd {case_dir} && ./run.sh")
                 return 0
         if args.command == "reproduce":
+            if args.reproduce_command == "catalog":
+                profiles = list_paper_profiles()
+                if args.json:
+                    print(json.dumps(profiles, indent=2))
+                else:
+                    for profile in profiles:
+                        print(f"{profile['key']}: {profile['display_name']} [{profile['model_family']}]")
+                return 0
             if args.reproduce_command == "init":
                 result = init_project(args.project)
                 print(json.dumps(result, indent=2))
                 return 0
+            if args.reproduce_command == "template":
+                result = init_profile_project(args.profile, args.project)
+                print(json.dumps(result, indent=2))
+                return 0
             if args.reproduce_command == "inspect":
-                result = inspect_code(args.code_path, args.project)
+                result = inspect_code(args.code_path, args.project, args.profile)
                 if args.json:
                     print(json.dumps(result, indent=2))
                 else:
                     print(f"Project: {result['project']}")
+                    print(f"Profile: {result['profile'] or 'auto/unknown'}")
                     print(f"Reproduction YAML: {result['reproduction_yaml']}")
                     print(f"Report: {result['report']}")
                     print(f"Parameter inventory: {result['parameter_inventory']}")
+                    print(f"Smoke plan: {result['smoke_plan']}")
+                    print(f"Version plan: {result['version_plan']}")
                     print(f"Level: {result['reproduction_level']}")
                 return 0
             if args.reproduce_command == "status":
