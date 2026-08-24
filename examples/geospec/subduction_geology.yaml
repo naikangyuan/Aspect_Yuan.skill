@@ -1,0 +1,40 @@
+schema_version: "1"
+project:
+  name: subduction_geospec_case
+scientific_question: "How does a cold oceanic plate descend into the mantle in a simple teaching-scale subduction setup?"
+model_family: subduction
+aspect:
+  version_policy: fingerprint-local-first
+  paper_version: null
+  local_version: null
+  migration_policy: do-not-migrate-automatically
+geometry:
+  dimension: 2
+  width_km: 3000
+  depth_km: 670
+mesh:
+  starter_resolution: coarse-teaching
+  global_refinement: null
+  adaptive_refinement: null
+thermal:
+  surface_temperature_K: 273
+  mantle_temperature_K: 1573
+plate:
+  age_Ma: 80
+  incoming_plate_thickness_km: 100
+subduction:
+  style: kinematically_driven
+  slab_dip_deg: 30
+  convergence_rate_cm_per_yr: 5.0
+rheology:
+  intent: "teaching starter rheology; verify before research use"
+  uses_plasticity: false
+materials:
+  composition_fields: "slab crust and mantle markers used for teaching visualization"
+boundary_conditions:
+  velocity_intent: "incoming oceanic plate converges toward the trench"
+  temperature_intent: "cold surface and hot mantle"
+outputs:
+  first_fields_to_check: "composition, temperature, velocity, viscosity, strain_rate"
+scientific_guardrails:
+  do_not_silently_change: "geometry, boundary velocities, rheology, composition fields, temperature, gravity, dimension, or timescale"

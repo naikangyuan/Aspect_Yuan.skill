@@ -36,6 +36,12 @@ ASPECT_BIN=/path/to/aspect scripts/aspect-yuan beginner subduction --output-dir 
 
 ```bash
 scripts/aspect-yuan env find-aspect
+scripts/aspect-yuan env fingerprint --aspect-bin /path/to/aspect
+scripts/aspect-yuan compat matrix
+scripts/aspect-yuan compat check /tmp/my_subduction/case.prm --aspect-bin /path/to/aspect
+scripts/aspect-yuan geospec init subduction --output /tmp/geology.yaml
+scripts/aspect-yuan geospec validate /tmp/geology.yaml
+scripts/aspect-yuan geospec create-case /tmp/geology.yaml --output-dir /tmp/geospec_subduction
 scripts/aspect-yuan model create templates/models/subduction/config.yaml --output-dir /tmp/subduction_case
 scripts/aspect-yuan model validate /tmp/subduction_case/case.prm
 scripts/aspect-yuan postprocess scan /tmp/subduction_case/output

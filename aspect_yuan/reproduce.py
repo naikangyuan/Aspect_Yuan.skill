@@ -8,7 +8,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .compatibility import classify_version
 from .config import dump_config, load_config
+from .fingerprint import fingerprint_aspect
 
 
 PROJECT_DIRS = ("paper", "source", "prm", "plugins", "docker", "runs", "figures", "comparison")
@@ -107,12 +109,13 @@ def inspect_code(code_path: Path, project: Path | None = None) -> dict[str, Any]
         (project_dir / name).mkdir(exist_ok=True)
 
     scan = scan_code_path(code_path)
+    local_profile = fingerprint_aspect()
     inventory = extract_parameter_inventory(scan.prm_files)
     write_parameter_inventory(inventory, project_dir / "parameter_inventory.csv")
     reproduction = _load_or_default(project_dir / "reproduction.yaml")
-    _merge_scan_into_config(reproduction, scan, project_dir)
+    _merge_scan_into_config(reproduction, scan, project_dir, local_profile)
     dump_config(reproduction, project_dir / "reproduction.yaml")
-    report = write_reproduction_report(project_dir, scan, inventory)
+    report = write_reproduction_report(project_dir, scan, inventory, local_profile)
     return {
         "project": str(project_dir),
         "code_path": str(code_path),
@@ -135,6 +138,7 @@ def reproduction_status(project: Path) -> dict[str, Any]:
     has_version = bool(evidence.get("aspect_versions") or evidence.get("git_commits") or evidence.get("branches"))
     has_report = (project / "REPRODUCTION_REPORT.md").exists()
     has_inventory = (project / "parameter_inventory.csv").exists()
+    version_compatibility = config.get("version_compatibility", {}) if isinstance(config.get("version_compatibility"), dict) else {}
     if has_prm and has_version and has_report and has_inventory:
         level = "Level 1 candidate: original PRM and version evidence found; run smoke next."
     elif has_prm:
@@ -148,6 +152,10 @@ def reproduction_status(project: Path) -> dict[str, Any]:
         "has_version_evidence": has_version,
         "has_report": has_report,
         "has_parameter_inventory": has_inventory,
+        "paper_aspect_version": version_compatibility.get("paper_aspect_version"),
+        "local_aspect_version": version_compatibility.get("local_aspect_version"),
+        "version_mismatch": version_compatibility.get("version_mismatch"),
+        "support_tier": version_compatibility.get("support_tier"),
         "next_step": "Run the smallest original .prm as a smoke test without changing geological parameters." if has_prm else "Run aspect-yuan reproduce inspect /path/to/paper-code --project PROJECT.",
     }
 
@@ -215,7 +223,7 @@ def write_parameter_inventory(rows: list[dict[str, str]], output: Path) -> None:
         writer.writerows(rows)
 
 
-def write_reproduction_report(project: Path, scan: ReproductionScan, inventory: list[dict[str, str]]) -> Path:
+def write_reproduction_report(project: Path, scan: ReproductionScan, inventory: list[dict[str, str]], local_profile: dict[str, Any] | None = None) -> Path:
     report = project / "REPRODUCTION_REPORT.md"
     smallest_prm = min(scan.prm_files, key=lambda p: p.stat().st_size) if scan.prm_files else None
     lines = [
@@ -244,6 +252,7 @@ def write_reproduction_report(project: Path, scan: ReproductionScan, inventory: 
     lines.extend([f"- `{path}`" for path in scan.prm_files[:50]] or ["- none detected"])
     lines.extend(["", "## Plugin/CMake Evidence", ""])
     lines.extend([f"- `{path}`" for path in (scan.plugin_files + scan.cmake_files)[:50]] or ["- none detected"])
+    lines.extend(_version_awareness_section(scan, local_profile or {}))
     lines.extend([
         "",
         "## Parameter Inventory",
@@ -317,7 +326,7 @@ def _load_or_default(path: Path) -> dict[str, Any]:
     return _default_reproduction_config()
 
 
-def _merge_scan_into_config(config: dict[str, Any], scan: ReproductionScan, project: Path) -> None:
+def _merge_scan_into_config(config: dict[str, Any], scan: ReproductionScan, project: Path, local_profile: dict[str, Any] | None = None) -> None:
     config.setdefault("source", {})["code_path"] = str(scan.code_path)
     config.setdefault("aspect", {})["version"] = scan.versions[0] if scan.versions else None
     config.setdefault("aspect", {})["git_commit"] = scan.commits[0] if scan.commits else None
@@ -326,7 +335,48 @@ def _merge_scan_into_config(config: dict[str, Any], scan: ReproductionScan, proj
     config.setdefault("model", {})["plugins"] = [str(path) for path in scan.plugin_files]
     config.setdefault("environment", {})["docker"] = bool(scan.dockerfiles)
     config["evidence"] = scan.to_dict(base=project)
+    paper_version = scan.versions[0] if scan.versions else None
+    local_version = (local_profile or {}).get("aspect_version")
+    paper_tier = classify_version(paper_version)["support_tier"]
+    config["version_compatibility"] = {
+        "paper_aspect_version": paper_version,
+        "local_aspect_version": local_version,
+        "version_mismatch": bool(paper_version and local_version and paper_version != local_version),
+        "support_tier": paper_tier,
+        "recommended_action": _version_reproduction_recommendation(paper_version, local_version, paper_tier),
+    }
     config["reproduction_level"] = reproduction_status_from_scan(scan)
+
+
+def _version_awareness_section(scan: ReproductionScan, local_profile: dict[str, Any]) -> list[str]:
+    paper_version = scan.versions[0] if scan.versions else None
+    local_version = local_profile.get("aspect_version")
+    tier = classify_version(paper_version)["support_tier"]
+    mismatch = bool(paper_version and local_version and paper_version != local_version)
+    return [
+        "",
+        "## ASPECT Version Awareness",
+        "",
+        f"- Paper ASPECT version: `{paper_version or 'unknown'}`",
+        f"- Local ASPECT version: `{local_version or 'unknown'}`",
+        f"- Version mismatch: `{'yes' if mismatch else 'no' if paper_version and local_version else 'unknown'}`",
+        f"- Aspect_Yuan support tier for paper version: `{tier}`",
+        f"- Recommendation: {_version_reproduction_recommendation(paper_version, local_version, tier)}",
+        "",
+        "Aspect_Yuan does not silently migrate paper models. If versions differ, reproduce first with the paper's original ASPECT version/commit or container when possible.",
+    ]
+
+
+def _version_reproduction_recommendation(paper_version: str | None, local_version: str | None, tier: str) -> str:
+    if not paper_version:
+        return "Find version evidence in README, supplement, Dockerfile, logs, or repository metadata before claiming exact reproduction."
+    if not local_version:
+        return "Fingerprint a local ASPECT binary before running the paper model."
+    if paper_version != local_version:
+        return f"Reproduce first using {paper_version} before attempting migration to local ASPECT {local_version}."
+    if tier in {"legacy-supported", "historical-reproduction"}:
+        return "Use an isolated build/container for this paper version and run the smallest original PRM as smoke test."
+    return "Versions match by detected text; run the smallest original PRM as smoke test without changing geological parameters."
 
 
 def reproduction_status_from_scan(scan: ReproductionScan) -> str:

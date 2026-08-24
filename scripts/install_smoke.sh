@@ -12,9 +12,10 @@ Checks:
   2. environment discovery
   3. model generation from packaged template configs
   4. beginner generation for subduction, mantle_convection, and rift
-  5. paper reproduction MVP inspection
-  6. unit tests and rule-based evals
-  7. optional real ASPECT subduction smoke when --aspect-bin is provided
+  5. GeoSpec geology.yaml workflow
+  6. paper reproduction MVP inspection
+  7. unit tests and rule-based evals
+  8. optional real ASPECT subduction smoke when --aspect-bin is provided
 
 Options:
   --aspect-bin PATH  ASPECT executable for the optional real smoke test.
@@ -56,24 +57,32 @@ find scripts -maxdepth 1 -type f -exec chmod +x {} +
 rm -rf "$WORK_DIR"
 mkdir -p "$WORK_DIR"
 
-echo "[1/7] CLI help"
+echo "[1/8] CLI help"
 scripts/aspect-yuan --help >/dev/null
 
-echo "[2/7] Environment discovery"
+echo "[2/8] Environment discovery"
 scripts/aspect-yuan env check >/dev/null
 
-echo "[3/7] Packaged template configs"
+echo "[3/8] Packaged template configs"
 for model in mantle_convection rift subduction; do
   test -f "templates/models/$model/config.yaml"
   scripts/aspect-yuan model create "templates/models/$model/config.yaml" --output-dir "$WORK_DIR/template-$model" >/dev/null
 done
 
-echo "[4/7] Beginner generation"
+echo "[4/8] Beginner generation"
 for model in mantle_convection rift subduction; do
   scripts/aspect-yuan beginner "$model" --output-dir "$WORK_DIR/beginner-$model" >/dev/null
 done
 
-echo "[5/7] Paper reproduction MVP"
+echo "[5/8] GeoSpec geology.yaml workflow"
+scripts/aspect-yuan geospec init subduction --output "$WORK_DIR/geology.yaml" >/dev/null
+scripts/aspect-yuan geospec validate "$WORK_DIR/geology.yaml" >/dev/null
+scripts/aspect-yuan geospec explain "$WORK_DIR/geology.yaml" >/dev/null
+scripts/aspect-yuan geospec create-case "$WORK_DIR/geology.yaml" --output-dir "$WORK_DIR/geospec-subduction" >/dev/null
+test -f "$WORK_DIR/geospec-subduction/case.prm"
+test -f "$WORK_DIR/geospec-subduction/GEOSPEC_EXPLANATION.md"
+
+echo "[6/8] Paper reproduction MVP"
 PAPER_CODE="$WORK_DIR/paper-code"
 PAPER_PROJECT="$WORK_DIR/paper-project"
 mkdir -p "$PAPER_CODE"
@@ -102,10 +111,10 @@ test -f "$PAPER_PROJECT/reproduction.yaml"
 test -f "$PAPER_PROJECT/REPRODUCTION_REPORT.md"
 test -f "$PAPER_PROJECT/parameter_inventory.csv"
 
-echo "[6/7] Unit tests"
+echo "[7/8] Unit tests"
 PYTHONPATH="$SKILL_ROOT${PYTHONPATH:+:$PYTHONPATH}" python3 -m unittest discover -s tests
 
-echo "[7/7] Static validation and evals"
+echo "[8/8] Static validation and evals"
 python3 scripts/static_validate_skill.py
 python3 scripts/run_skill_evals.py
 

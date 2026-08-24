@@ -1,6 +1,7 @@
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from aspect_yuan.reproduce import init_project, inspect_code, reproduction_status, scan_code_path
 
@@ -32,7 +33,11 @@ class ReproductionPlaceholderTests(unittest.TestCase):
             )
             project = root / "repro"
             init_project(project)
-            result = inspect_code(code, project)
+            with mock.patch(
+                "aspect_yuan.reproduce.fingerprint_aspect",
+                return_value={"aspect_version": "3.0.0", "support_tier": "primary-supported", "detection_evidence": []},
+            ):
+                result = inspect_code(code, project)
             self.assertTrue((project / "reproduction.yaml").exists())
             self.assertTrue((project / "REPRODUCTION_REPORT.md").exists())
             self.assertTrue((project / "parameter_inventory.csv").exists())
@@ -40,11 +45,15 @@ class ReproductionPlaceholderTests(unittest.TestCase):
             report = (project / "REPRODUCTION_REPORT.md").read_text(encoding="utf-8")
             self.assertIn("model.prm", report)
             self.assertIn("Smoke Test Plan", report)
+            self.assertIn("ASPECT Version Awareness", report)
+            self.assertIn("Reproduce first using 2.5.0", report)
             inventory = (project / "parameter_inventory.csv").read_text(encoding="utf-8")
             self.assertIn("Dimension", inventory)
             status = reproduction_status(project)
             self.assertTrue(status["has_prm"])
             self.assertTrue(status["has_version_evidence"])
+            self.assertEqual(status["local_aspect_version"], "3.0.0")
+            self.assertTrue(status["version_mismatch"])
 
     def test_embedded_aspect_source_prms_are_not_primary_paper_prms(self):
         with tempfile.TemporaryDirectory() as tmp:

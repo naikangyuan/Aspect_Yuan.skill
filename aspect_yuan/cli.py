@@ -8,8 +8,11 @@ import sys
 from pathlib import Path
 
 from .beginner import run_beginner
+from .compatibility import assess_compatibility, format_compat_check, format_compat_explain, format_policy_matrix, policy_matrix
 from .config import load_config
 from .env import discover_aspect, environment_check, format_aspect_candidates, format_environment_check
+from .fingerprint import fingerprint_aspect, format_fingerprint
+from .geospec import create_case_from_geospec, explain_geospec, format_geospec_validation, geospec_to_model_config, init_geospec, validate_geospec
 from .models import create_model, list_models
 from .output_scan import format_scan, scan_output, write_scan
 from .plotting import plot_from_config
@@ -50,6 +53,41 @@ def main(argv: list[str] | None = None) -> int:
     check = env_sub.add_parser("check", help="Check ASPECT, Python, MPI, Docker, and plotting-related tools.")
     check.add_argument("--search-root", action="append", type=Path, default=[], help="Additional directory to search.")
     check.add_argument("--json", action="store_true")
+    fingerprint = env_sub.add_parser("fingerprint", help="Detect and record the active ASPECT version/build profile.")
+    fingerprint.add_argument("--aspect-bin", help="Explicit ASPECT executable.")
+    fingerprint.add_argument("--search-root", action="append", type=Path, default=[], help="Additional directory to search.")
+    fingerprint.add_argument("--output", type=Path, default=Path("aspect_profile.json"), help="JSON profile path. Default: aspect_profile.json")
+    fingerprint.add_argument("--json", action="store_true", help="Print JSON instead of the human summary.")
+    compat = sub.add_parser("compat", help="Explain ASPECT version support and PRM compatibility risk.")
+    compat_sub = compat.add_subparsers(dest="compat_command", required=True)
+    compat_matrix = compat_sub.add_parser("matrix", help="Show Aspect_Yuan ASPECT version support policy.")
+    compat_matrix.add_argument("--json", action="store_true")
+    compat_check = compat_sub.add_parser("check", help="Check a PRM against the detected ASPECT version without rewriting it.")
+    compat_check.add_argument("prm", type=Path)
+    compat_check.add_argument("--aspect-bin", help="Explicit ASPECT executable.")
+    compat_check.add_argument("--search-root", action="append", type=Path, default=[], help="Additional directory to search.")
+    compat_check.add_argument("--json", action="store_true")
+    compat_explain = compat_sub.add_parser("explain", help="Explain ASPECT version risk for a PRM in geologist-facing language.")
+    compat_explain.add_argument("prm", type=Path)
+    compat_explain.add_argument("--aspect-bin", help="Explicit ASPECT executable.")
+    compat_explain.add_argument("--search-root", action="append", type=Path, default=[], help="Additional directory to search.")
+    compat_explain.add_argument("--json", action="store_true")
+    geospec = sub.add_parser("geospec", help="Create, validate, and explain geology-first model intent files.")
+    geospec_sub = geospec.add_subparsers(dest="geospec_command", required=True)
+    geospec_init = geospec_sub.add_parser("init", help="Create a geology.yaml template for a supported model family.")
+    geospec_init.add_argument("model_family", choices=["mantle_convection", "subduction", "rift"])
+    geospec_init.add_argument("--output", type=Path, default=Path("geology.yaml"))
+    geospec_validate = geospec_sub.add_parser("validate", help="Validate geology.yaml without generating or rewriting a PRM.")
+    geospec_validate.add_argument("geology_yaml", type=Path)
+    geospec_validate.add_argument("--json", action="store_true")
+    geospec_explain = geospec_sub.add_parser("explain", help="Explain geology.yaml in geologist-facing language.")
+    geospec_explain.add_argument("geology_yaml", type=Path)
+    geospec_model_config = geospec_sub.add_parser("model-config", help="Convert geology.yaml to the existing starter model config.")
+    geospec_model_config.add_argument("geology_yaml", type=Path)
+    geospec_model_config.add_argument("--output", type=Path)
+    geospec_create = geospec_sub.add_parser("create-case", help="Generate a starter ASPECT case from geology.yaml.")
+    geospec_create.add_argument("geology_yaml", type=Path)
+    geospec_create.add_argument("--output-dir", type=Path)
     reproduce = sub.add_parser("reproduce", help="Initialize and inspect ASPECT paper-reproduction projects.")
     reproduce_sub = reproduce.add_subparsers(dest="reproduce_command", required=True)
     reproduce_init = reproduce_sub.add_parser("init", help="Create a paper reproduction project.")
@@ -97,6 +135,50 @@ def main(argv: list[str] | None = None) -> int:
             if args.env_command == "check":
                 result = environment_check(extra_roots=args.search_root)
                 print(json.dumps(result, indent=2) if args.json else format_environment_check(result))
+                return 0
+            if args.env_command == "fingerprint":
+                result = fingerprint_aspect(args.aspect_bin, args.search_root)
+                args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+                print(json.dumps(result, indent=2) if args.json else format_fingerprint(result))
+                return 0
+        if args.command == "compat":
+            if args.compat_command == "matrix":
+                print(json.dumps(policy_matrix(), indent=2) if args.json else format_policy_matrix())
+                return 0
+            if args.compat_command in {"check", "explain"}:
+                profile = fingerprint_aspect(args.aspect_bin, args.search_root)
+                result = assess_compatibility(args.prm, profile)
+                if args.json:
+                    print(json.dumps(result, indent=2))
+                elif args.compat_command == "check":
+                    print(format_compat_check(result))
+                else:
+                    print(format_compat_explain(result))
+                return 1 if result["prm_syntax"] == "fail" else 0
+        if args.command == "geospec":
+            if args.geospec_command == "init":
+                result = init_geospec(args.model_family, args.output)
+                print(json.dumps(result, indent=2))
+                return 0
+            if args.geospec_command == "validate":
+                issues = validate_geospec(args.geology_yaml)
+                print(json.dumps(issues, indent=2) if args.json else format_geospec_validation(issues))
+                return 1 if any(issue["level"] == "ERROR" for issue in issues) else 0
+            if args.geospec_command == "explain":
+                print(explain_geospec(args.geology_yaml))
+                return 0
+            if args.geospec_command == "model-config":
+                config = geospec_to_model_config(args.geology_yaml)
+                if args.output:
+                    args.output.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+                    print(f"Wrote model config: {args.output}")
+                else:
+                    print(json.dumps(config, indent=2))
+                return 0
+            if args.geospec_command == "create-case":
+                case_dir = create_case_from_geospec(args.geology_yaml, args.output_dir)
+                print(f"Created ASPECT case from GeoSpec: {case_dir}")
+                print(f"Run: cd {case_dir} && ./run.sh")
                 return 0
         if args.command == "reproduce":
             if args.reproduce_command == "init":

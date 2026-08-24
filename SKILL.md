@@ -15,7 +15,7 @@ Every answer must start with the geological meaning of the proposed model, then 
 2. **Version and installation system**: choose whether to use the user's existing ASPECT, install a tagged release, build a paper-specific commit, or use a container/environment file. Never overwrite an existing ASPECT checkout; install into an isolated directory.
 3. **PRM modeling system**: learn from local ASPECT cookbooks, benchmarks, tests, and documentation; draft `.prm` parameter files; explain existing parameter files; check parameter consistency; propose minimal changes.
 4. **Plugin development system**: identify the right ASPECT plugin type; generate small plugin skeletons or edits; explain how the plugin is enabled from `.prm`; outline build and smoke-test steps without modifying ASPECT core files unless explicitly requested.
-5. **Aspect_Yuan CLI system**: use `scripts/aspect-yuan` for v0.2-dev beginner one-command lessons, model generation, starter PRM validation, ASPECT output scanning, publication figure recipe creation, scientific colormap presets, and journal-style plot presets.
+5. **Aspect_Yuan CLI system**: use `scripts/aspect-yuan` for beginner one-command lessons, GeoSpec `geology.yaml` model intent files, model generation, starter PRM validation, ASPECT version fingerprinting, compatibility risk checks, ASPECT output scanning, publication figure recipe creation, scientific colormap presets, and journal-style plot presets.
 
 ## Required Workflow
 
@@ -47,7 +47,12 @@ Every answer must start with the geological meaning of the proposed model, then 
    - Unified CLI: use `scripts/aspect-yuan --help` to discover implemented v0.2-dev commands
    - Installed-script permissions: if GitHub installation leaves scripts non-executable and `scripts/aspect-yuan` reports `Permission denied`, run `chmod +x scripts/*` in the skill root or invoke the wrapper as `bash scripts/aspect-yuan ...`
    - Environment discovery: before running ASPECT, use `scripts/aspect-yuan env find-aspect` or `scripts/aspect-yuan env check`; prefer `ASPECT_BIN`, `ASPECT_ROOT`, `PATH`, and `--search-root /path/to/search` over hard-coded user-specific paths
+   - ASPECT version fingerprinting: before generating, validating, explaining, running, or reproducing against a local ASPECT installation, run `scripts/aspect-yuan env fingerprint --aspect-bin /path/to/aspect` when the executable is known, or `scripts/aspect-yuan env fingerprint --search-root /path/to/search` when it must be discovered; record the generated JSON profile
+   - Version support policy: run `scripts/aspect-yuan compat matrix` to explain Aspect_Yuan support tiers for ASPECT 3.0.x, 3.1-pre, 2.4.x-2.5.x, historical releases, and unknown versions
+   - PRM compatibility checking: run `scripts/aspect-yuan compat check path/to/case.prm --aspect-bin /path/to/aspect` to detect version-sensitive features without rewriting the PRM
+   - Geologist-facing compatibility explanation: run `scripts/aspect-yuan compat explain path/to/case.prm --aspect-bin /path/to/aspect` when the user needs plain-language guidance about whether to use the original paper version or the local ASPECT
    - Beginner one-command workflow: for first-time geologists use `scripts/aspect-yuan beginner subduction`, `scripts/aspect-yuan beginner mantle_convection`, or `scripts/aspect-yuan beginner rift`; add `--run --aspect-bin /path/to/aspect` only when the ASPECT executable is known, otherwise run `scripts/aspect-yuan env find-aspect` first
+   - GeoSpec geology-first workflow: use `scripts/aspect-yuan geospec init subduction --output geology.yaml`, `scripts/aspect-yuan geospec validate geology.yaml`, `scripts/aspect-yuan geospec explain geology.yaml`, and `scripts/aspect-yuan geospec create-case geology.yaml --output-dir CASE` when the user wants to start from a geological question and explicit scientific assumptions
    - Model generator: run `scripts/aspect-yuan model list`, `scripts/aspect-yuan model create examples/models/mantle_convection_basic.yaml --output-dir /tmp/case`, and `scripts/aspect-yuan model validate /tmp/case/case.prm`
    - Output scanner: run `scripts/aspect-yuan postprocess scan output/ --json`
    - Publication plotting: run `scripts/aspect-yuan plot examples/figures/temperature.yaml`; use `output.metadata_only: true` when PyVista/VTK is not installed
@@ -79,6 +84,8 @@ Every answer must start with the geological meaning of the proposed model, then 
 - Do not hide scientific tradeoffs behind numerical convenience.
 - Do not convert a 3-D geological question to 2-D, change compressibility, alter rheology, remove a weak zone, change boundary velocities, or simplify material domains without asking or clearly labeling it as an optional simplification.
 - If the local checkout version differs from ASPECT 3.0.0, mention the local `VERSION` and treat differences as compatibility risks.
+- Aspect_Yuan does not guarantee universal compatibility across ASPECT versions. For paper reproduction, exact paper version/commit/container remains preferred whenever known.
+- `geology.yaml` records geological intent. It is not a promise of scientific correctness and must not be used to silently migrate or rewrite paper PRMs.
 - Keep generated models small enough to inspect first, then describe how to scale resolution, duration, or physics.
 
 ## Output Shape

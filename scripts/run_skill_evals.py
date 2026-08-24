@@ -45,6 +45,15 @@ REQUIRED_BY_CASE = {
         "scripts/aspect-yuan postprocess scan",
         "scripts/aspect-yuan plot",
     ],
+    "geospec_subduction.md": [
+        "scripts/aspect-yuan geospec init subduction",
+        "scripts/aspect-yuan geospec validate",
+        "scripts/aspect-yuan geospec explain",
+        "scripts/aspect-yuan geospec create-case",
+        "examples/geospec/subduction_geology.yaml",
+        "scripts/aspect-yuan env fingerprint",
+        "scripts/aspect-yuan compat check",
+    ],
     "rift_beginner.md": [
         "model_wizards/rift_wizard.md",
         "assets/prm_templates/beginner_rift.prm",
