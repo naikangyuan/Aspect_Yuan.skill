@@ -39,6 +39,9 @@ scripts/aspect-yuan env find-aspect
 scripts/aspect-yuan model create templates/models/subduction/config.yaml --output-dir /tmp/subduction_case
 scripts/aspect-yuan model validate /tmp/subduction_case/case.prm
 scripts/aspect-yuan postprocess scan /tmp/subduction_case/output
+scripts/aspect-yuan reproduce init /tmp/paper_repro
+scripts/aspect-yuan reproduce inspect /path/to/paper-code --project /tmp/paper_repro
+scripts/aspect-yuan reproduce status /tmp/paper_repro
 ```
 
 Optional plotting dependencies:

@@ -58,6 +58,7 @@ Every answer must start with the geological meaning of the proposed model, then 
    - Statistics parsing/plotting: run `scripts/parse_aspect_statistics.py path/to/statistics` or `scripts/plot_statistics.py path/to/statistics`
    - Plugin build helper: run `scripts/build_aspect_plugin.sh path/to/plugin-dir --aspect-dir path/to/aspect-build`
    - Plugin request triage: run `scripts/explain_plugin_request.py "natural language request"`
+   - Paper reproduction MVP: run `scripts/aspect-yuan reproduce init PAPER_PROJECT`, then `scripts/aspect-yuan reproduce inspect /path/to/paper-code --project PAPER_PROJECT`, then `scripts/aspect-yuan reproduce status PAPER_PROJECT`; this creates reproduction.yaml, REPRODUCTION_REPORT.md, and parameter_inventory.csv without changing the paper model
    - Paper/version detection: run `scripts/detect_aspect_reproduction_context.py --text path/to/paper_or_readme.txt` or `--path path/to/downloaded/code`
    - Model-family version planning: run `scripts/plan_aspect_version.py "user geological request or paper title"`
    - Isolated ASPECT source checkout/build planning: use `scripts/install_aspect_version.sh --help`; execute only after explaining target version, install directory, dependencies, and approval needs

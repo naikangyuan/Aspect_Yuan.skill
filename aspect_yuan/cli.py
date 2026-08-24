@@ -14,6 +14,7 @@ from .models import create_model, list_models
 from .output_scan import format_scan, scan_output, write_scan
 from .plotting import plot_from_config
 from .prm import validate_prm
+from .reproduce import init_project, inspect_code, reproduction_status
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -49,6 +50,17 @@ def main(argv: list[str] | None = None) -> int:
     check = env_sub.add_parser("check", help="Check ASPECT, Python, MPI, Docker, and plotting-related tools.")
     check.add_argument("--search-root", action="append", type=Path, default=[], help="Additional directory to search.")
     check.add_argument("--json", action="store_true")
+    reproduce = sub.add_parser("reproduce", help="Initialize and inspect ASPECT paper-reproduction projects.")
+    reproduce_sub = reproduce.add_subparsers(dest="reproduce_command", required=True)
+    reproduce_init = reproduce_sub.add_parser("init", help="Create a paper reproduction project.")
+    reproduce_init.add_argument("project", type=Path)
+    reproduce_inspect = reproduce_sub.add_parser("inspect", help="Inspect a downloaded paper code directory.")
+    reproduce_inspect.add_argument("code_path", type=Path)
+    reproduce_inspect.add_argument("--project", type=Path, help="Reproduction project directory. Defaults to current directory.")
+    reproduce_inspect.add_argument("--json", action="store_true")
+    reproduce_status_cmd = reproduce_sub.add_parser("status", help="Report reproduction level for a project.")
+    reproduce_status_cmd.add_argument("project", type=Path, nargs="?", default=Path("."))
+    reproduce_status_cmd.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
     try:
         if args.command == "beginner":
@@ -85,6 +97,26 @@ def main(argv: list[str] | None = None) -> int:
             if args.env_command == "check":
                 result = environment_check(extra_roots=args.search_root)
                 print(json.dumps(result, indent=2) if args.json else format_environment_check(result))
+                return 0
+        if args.command == "reproduce":
+            if args.reproduce_command == "init":
+                result = init_project(args.project)
+                print(json.dumps(result, indent=2))
+                return 0
+            if args.reproduce_command == "inspect":
+                result = inspect_code(args.code_path, args.project)
+                if args.json:
+                    print(json.dumps(result, indent=2))
+                else:
+                    print(f"Project: {result['project']}")
+                    print(f"Reproduction YAML: {result['reproduction_yaml']}")
+                    print(f"Report: {result['report']}")
+                    print(f"Parameter inventory: {result['parameter_inventory']}")
+                    print(f"Level: {result['reproduction_level']}")
+                return 0
+            if args.reproduce_command == "status":
+                result = reproduction_status(args.project)
+                print(json.dumps(result, indent=2) if args.json else "\n".join(f"{k}: {v}" for k, v in result.items()))
                 return 0
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

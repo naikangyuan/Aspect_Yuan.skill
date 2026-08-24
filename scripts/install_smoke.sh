@@ -12,8 +12,9 @@ Checks:
   2. environment discovery
   3. model generation from packaged template configs
   4. beginner generation for subduction, mantle_convection, and rift
-  5. unit tests and rule-based evals
-  6. optional real ASPECT subduction smoke when --aspect-bin is provided
+  5. paper reproduction MVP inspection
+  6. unit tests and rule-based evals
+  7. optional real ASPECT subduction smoke when --aspect-bin is provided
 
 Options:
   --aspect-bin PATH  ASPECT executable for the optional real smoke test.
@@ -72,18 +73,47 @@ for model in mantle_convection rift subduction; do
   scripts/aspect-yuan beginner "$model" --output-dir "$WORK_DIR/beginner-$model" >/dev/null
 done
 
-echo "[5/7] Unit tests"
+echo "[5/7] Paper reproduction MVP"
+PAPER_CODE="$WORK_DIR/paper-code"
+PAPER_PROJECT="$WORK_DIR/paper-project"
+mkdir -p "$PAPER_CODE"
+cat > "$PAPER_CODE/README.md" <<'EOF'
+Example paper code. ASPECT version 2.5.0, branch paper-model, commit 0123456789abcdef0123456789abcdef01234567.
+EOF
+cat > "$PAPER_CODE/Dockerfile" <<'EOF'
+FROM ubuntu:22.04
+EOF
+cat > "$PAPER_CODE/CMakeLists.txt" <<'EOF'
+add_library(plugin SHARED material_model.cc)
+EOF
+cat > "$PAPER_CODE/material_model.cc" <<'EOF'
+// material model plugin
+EOF
+cat > "$PAPER_CODE/model.prm" <<'EOF'
+set Dimension = 2
+subsection Geometry model
+  set Model name = box
+end
+EOF
+scripts/aspect-yuan reproduce init "$PAPER_PROJECT" >/dev/null
+scripts/aspect-yuan reproduce inspect "$PAPER_CODE" --project "$PAPER_PROJECT" >/dev/null
+scripts/aspect-yuan reproduce status "$PAPER_PROJECT" >/dev/null
+test -f "$PAPER_PROJECT/reproduction.yaml"
+test -f "$PAPER_PROJECT/REPRODUCTION_REPORT.md"
+test -f "$PAPER_PROJECT/parameter_inventory.csv"
+
+echo "[6/7] Unit tests"
 PYTHONPATH="$SKILL_ROOT${PYTHONPATH:+:$PYTHONPATH}" python3 -m unittest discover -s tests
 
-echo "[6/7] Static validation and evals"
+echo "[7/7] Static validation and evals"
 python3 scripts/static_validate_skill.py
 python3 scripts/run_skill_evals.py
 
 if [[ -n "$ASPECT_BIN" ]]; then
-  echo "[7/7] Real ASPECT subduction smoke"
+  echo "[extra] Real ASPECT subduction smoke"
   scripts/aspect-yuan beginner subduction --output-dir "$WORK_DIR/real-subduction" --run --aspect-bin "$ASPECT_BIN" >/dev/null
 else
-  echo "[7/7] Real ASPECT subduction smoke skipped: pass --aspect-bin PATH to run it."
+  echo "[extra] Real ASPECT subduction smoke skipped: pass --aspect-bin PATH to run it."
 fi
 
 echo "Install smoke passed. Work directory: $WORK_DIR"
